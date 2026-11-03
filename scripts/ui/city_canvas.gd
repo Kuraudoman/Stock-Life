@@ -1,8 +1,9 @@
 extends Control
-## 晚间城区的占位地图：代码画出的色块和房子，配色跟 ui_style 的奶油纸 / 木框一致。
-## 点一块区域就选中它。坐标来自 data/evening.json，0–1 相对这块地图。
+## 晚间城区。每块区域铺 data/evening.json 里的插画（线性过滤），名字压在底部暗条上。
+## 点一块区域就选中它。坐标是 0–1，相对这块地图。
 
 const UI := preload("res://scripts/ui/ui_style.gd")
+const Evening := preload("res://scripts/core/evening.gd")
 
 signal location_selected(id: String)
 
@@ -19,6 +20,8 @@ func set_locations(locs: Array, sel: String) -> void:
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	# 插画不是像素图。项目默认最近邻，这里单独用线性 + mipmap。
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 
 
 func _notification(what: int) -> void:
@@ -74,35 +77,34 @@ func _rect_of(r: Rect2, loc: Dictionary) -> Rect2:
 
 func _draw_district(rect: Rect2, loc: Dictionary, is_sel: bool, font: Font) -> void:
 	var base := Color(String(loc.get("color", "#e4c98a")))
-	draw_rect(rect, base.darkened(0.08))
-	draw_rect(rect.grow(-3), base)
-	var buildings := 3 if rect.size.x > 120.0 else 2
-	var gap := 6.0
-	var bw := (rect.size.x - gap * (buildings + 1)) / buildings
-	for i in buildings:
-		var bh := rect.size.y * (0.34 + 0.08 * (i % 2))
-		var bx := rect.position.x + gap + i * (bw + gap)
-		var by := rect.position.y + rect.size.y * 0.28
-		var wall := base.darkened(0.22 + 0.06 * (i % 2))
-		draw_rect(Rect2(bx, by, bw, bh), wall)
-		# 屋顶
-		var roof := PackedVector2Array([
-			Vector2(bx - 2, by),
-			Vector2(bx + bw * 0.5, by - 10),
-			Vector2(bx + bw + 2, by),
-		])
-		draw_colored_polygon(roof, wall.darkened(0.15))
-		var win := Color(0.98, 0.86, 0.45) if (i + int(rect.position.x)) % 2 == 0 else Color(0.45, 0.55, 0.68)
-		draw_rect(Rect2(bx + 4, by + 6, 6, 6), win)
-		if bw > 28.0:
-			draw_rect(Rect2(bx + bw - 12, by + 6, 6, 6), win)
+	draw_rect(rect, base.darkened(0.15))
+	var inner := rect.grow(-2)
+	var tex := Evening.load_background(String(loc.get("background", "")))
+	if tex != null:
+		draw_texture_rect_region(tex, inner, _cover_src(tex.get_size(), inner.size))
+		# 压暗一点，木框和名字才站得住
+		var shade := 0.10 if is_sel else 0.22
+		draw_rect(inner, Color(0.10, 0.07, 0.05, shade))
+	else:
+		draw_rect(inner, base)
+	var bar_h := minf(22.0, inner.size.y * 0.34)
+	var bar := Rect2(inner.position.x, inner.end.y - bar_h, inner.size.x, bar_h)
+	draw_rect(bar, Color(0.16, 0.10, 0.06, 0.78))
 	var border := UI.UP if is_sel else UI.WOOD_DARK
 	draw_rect(rect, border, false, 3.0 if is_sel else 1.0)
 	if font == null:
 		return
 	var label := String(loc.get("name", ""))
-	var pos := rect.position + Vector2(6, rect.size.y - 8)
-	draw_string(font, pos, label, HORIZONTAL_ALIGNMENT_LEFT, rect.size.x - 12, 15, UI.TEXT)
+	draw_string(font, bar.position + Vector2(7, bar_h - 6), label, HORIZONTAL_ALIGNMENT_LEFT, bar.size.x - 12, 15, Color(1, 0.96, 0.88))
+
+
+## 把 16:9 的插画裁成铺满格子的一块（居中 cover）。
+static func _cover_src(tex_size: Vector2, dest_size: Vector2) -> Rect2:
+	if tex_size.x <= 1.0 or tex_size.y <= 1.0 or dest_size.x <= 1.0 or dest_size.y <= 1.0:
+		return Rect2(Vector2.ZERO, tex_size)
+	var scale := maxf(dest_size.x / tex_size.x, dest_size.y / tex_size.y)
+	var visible := dest_size / scale
+	return Rect2((tex_size - visible) * 0.5, visible)
 
 
 func _draw_moon(r: Rect2) -> void:

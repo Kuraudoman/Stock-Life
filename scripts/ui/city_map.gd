@@ -3,6 +3,7 @@ extends "res://scripts/ui/overlay.gd"
 ## 休市日会连续过：睡完一晚如果下一天不开市，这张地图刷新成下一天，不回到交易界面。
 
 const Calendar := preload("res://scripts/core/calendar.gd")
+const Evening := preload("res://scripts/core/evening.gd")
 const UI := preload("res://scripts/ui/ui_style.gd")
 const DialogScene := preload("res://scenes/dialog.tscn")
 
@@ -10,6 +11,7 @@ const DialogScene := preload("res://scenes/dialog.tscn")
 @onready var ap_label: Label = %ApLabel
 @onready var stats_label: Label = %StatsLabel
 @onready var map = %Map
+@onready var banner: TextureRect = %Banner
 @onready var place_title: Label = %PlaceTitle
 @onready var place_blurb: Label = %PlaceBlurb
 @onready var actions_box: VBoxContainer = %Actions
@@ -49,11 +51,15 @@ func _refresh() -> void:
 	if loc.is_empty():
 		place_title.text = ""
 		place_blurb.text = ""
+		banner.texture = null
 		_fill_actions([])
 	else:
 		_selected = String(loc.id)
 		place_title.text = "%s  ·  %s" % [loc.get("name", ""), loc.get("area", "")]
 		place_blurb.text = String(loc.get("blurb", ""))
+		var picture := Evening.load_background(String(loc.get("background", "")))
+		banner.texture = picture
+		banner.visible = picture != null
 		_fill_actions(loc.get("actions", []))
 	var lines: PackedStringArray = []
 	for c in _carry:

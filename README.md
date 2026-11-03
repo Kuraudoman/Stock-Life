@@ -48,7 +48,7 @@ M2（v0.4–v0.6，「系统扩展」）有四块：晚间行动与属性、好�
 ## 测试与平衡
 
 ```bash
-# 自动测试（134 项：日历、价格模型、交易规则、事件冲击、新闻日程与前兆、主角状态、晚间行动与属性、
+# 自动测试（156 项：日历、价格模型、交易规则、事件冲击、新闻日程与前兆、主角状态、晚间行动与属性、城区背景、
 # 走势预测、诺艾尔的分析、第一章胜负、存档往返、版本 1 → 2 与 2 → 3 迁移）
 godot --headless --path . --script res://tools/run_tests.gd
 
@@ -102,6 +102,8 @@ godot --headless --path . --script res://tools/build_ui_assets.gd -- --pack "../
 ```
 
 代码里用到的颜色集中在 `scripts/ui/ui_style.gd`。主题里的变体：`FeaturePanel`（带金属包角的重点面板）、`RibbonLabel` / `RibbonTitle`（红色缎带标题）、`BuyButton` / `SellButton`、`StockRow`。
+
+晚间城区的背景是作者为本项目生成的 AI 插画（奥术蒸汽朋克，16:9），放在 `assets/backgrounds/city/`，说明见同目录的 `SOURCE.txt`。路径写在 `data/evening.json` 的 `background` 里，不写死在代码里。住所可以按等级换图：阁楼用 `home_attic.jpg`，以后的公寓、宅邸、浮空庄园只要在住房条目上加 `background`，没有就继续用阁楼那张。这些图会缩小显示，导入时带 mipmap，地图和侧栏单独用线性过滤，不跟着界面的最近邻走。
 
 ## 存档
 
@@ -167,9 +169,11 @@ stock-life/
 │       ├── fx_layer.gd       # 涨停金币雨、暴跌震屏
 │       └── ui_style.gd       # 配色与格式化
 ├── data/                     # 见上文“数据文件”
-├── assets/ui/
-│   ├── theme.tres            # 浅色像素主题：奶油纸面 + 木框 + 天空蓝底，中文使用系统字体
-│   └── kenney/               # 界面贴图，由 tools/build_ui_assets.gd 从 Kenney 素材包生成（CC0）
+├── assets/
+│   ├── backgrounds/city/     # 晚间城区插画（作者为本项目生成的 AI 图，见 SOURCE.txt）
+│   └── ui/
+│       ├── theme.tres        # 浅色像素主题：奶油纸面 + 木框 + 天空蓝底，中文使用系统字体
+│       └── kenney/           # 界面贴图，由 tools/build_ui_assets.gd 从 Kenney 素材包生成（CC0）
 ├── saves/                    # 编辑器运行时的存档（不提交）
 ├── tools/
 │   ├── run_tests.gd          # 自动测试

@@ -184,6 +184,33 @@ static func resolve_hook(_hook: String, _ctx: Dictionary) -> Dictionary:
 
 # ---------------------------------------------------------------- 界面用的描述
 
+## 城区插画。background_track 为 "housing" 时，用当前住所等级上的 background；
+## 该等级没写图，就回退到城区自己的 background（阁楼那张）。
+static func background_path(loc: Dictionary, player: Dictionary = {}) -> String:
+	var track := String(loc.get("background_track", ""))
+	if track != "":
+		var from_tier := String(tier(player, track).get("background", ""))
+		if from_tier != "":
+			return from_tier
+	return String(loc.get("background", ""))
+
+
+static var _backgrounds: Dictionary = {}
+
+
+## 线性过滤由界面在绘制时设置。这里只负责按路径加载。
+static func load_background(path: String) -> Texture2D:
+	if path == "":
+		return null
+	if _backgrounds.has(path):
+		var cached: Variant = _backgrounds[path]
+		return cached if cached is Texture2D else null
+	var res: Variant = load(path) if FileAccess.file_exists(path) else null
+	var tex: Texture2D = res if res is Texture2D else null
+	_backgrounds[path] = tex
+	return tex
+
+
 static func snapshot(session: Dictionary, player: Dictionary, cash: float) -> Dictionary:
 	var kind := String(session.get("kind", "weekday"))
 	var locs: Array = []
@@ -193,6 +220,8 @@ static func snapshot(session: Dictionary, player: Dictionary, cash: float) -> Di
 			actions.append(action_view(session, player, cash, String(id)))
 		var copy: Dictionary = loc.duplicate(true)
 		copy.actions = actions
+		copy.background = background_path(loc, player)
+		copy.erase("background_track")
 		locs.append(copy)
 	var cap := int(rules().get("exp_cap", 100))
 	var hp_delta := int(session.get("hp_delta", 0))

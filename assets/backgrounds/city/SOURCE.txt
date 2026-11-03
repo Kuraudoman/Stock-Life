@@ -1,0 +1,17 @@
+城区背景
+
+这些图是本项目作者为 Stock-Life 画的 AI 插画（奥术蒸汽朋克，16:9），
+随仓库一起分发，供晚间城市地图使用。
+
+不是 Kenney 的像素素材。项目默认是最近邻采样，这些插画在导入时生成 mipmap，
+绘制时单独用线性过滤，缩小后才不会起锯齿。
+
+文件对应 data/evening.json 里的城区：
+
+- golden_avenue.jpg  金穗大道
+- industrial.jpg     魔导工业区
+- harbor.jpg         港区
+- noble.jpg          贵族区
+- academy.jpg        学院区
+- lower_town.jpg     下城
+- home_attic.jpg     住所的阁楼。住房条目上可以再写 background；没写的等级回退到城区自己的 background（目前就是这张阁楼）。

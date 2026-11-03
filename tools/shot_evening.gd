@@ -23,6 +23,10 @@ func _initialize() -> void:
 	for _i in 3:
 		await process_frame
 	_save("city-map-downtown")
+	map._on_location("avenue")
+	for _i in 3:
+		await process_frame
+	_save("city-map-avenue")
 	quit()
 
 

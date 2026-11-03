@@ -1,5 +1,5 @@
 extends SceneTree
-## 自动测试：价格模型可复现、涨跌停、交易规则、存档往返；M1：新闻、状态、预测、诺艾尔、第一章、存档迁移；M2：晚间行动点与版本 2 → 3。
+## 自动测试：价格模型可复现、涨跌停、交易规则、存档往返；M1：新闻、状态、预测、诺艾尔、第一章、存档迁移；M2：晚间行动点、城区背景、版本 2 → 3。
 ## 用法：godot --headless --path . --script res://tools/run_tests.gd
 
 const Calendar := preload("res://scripts/core/calendar.gd")
@@ -26,6 +26,7 @@ func _initialize() -> void:
 	_test_events(companies)
 	_test_life()
 	_test_evening_logic()
+	_test_city_backgrounds()
 	_test_predict_decide()
 	_test_noelle(companies)
 	await process_frame
@@ -564,6 +565,27 @@ func _test_evening_logic() -> void:
 	worn.hp = 55
 	Life.end_trading_day(worn, 0.0, 10)
 	check(String(worn.body) == "tired", "收盘后体力低于 50 就是疲劳")
+
+
+func _test_city_backgrounds() -> void:
+	print("城区背景")
+	var seen := {}
+	var home := {}
+	for loc in Evening.data().get("locations", []):
+		var path := Evening.background_path(loc, {"housing": "attic"})
+		var id := String(loc.id)
+		check(path != "" and not seen.has(path), "每块城区一张自己的图（%s）" % id)
+		seen[path] = true
+		check(FileAccess.file_exists(path), "背景文件在（%s）" % path.get_file())
+		var tex := Evening.load_background(path)
+		var w := tex.get_width() if tex != null else 0
+		var h := tex.get_height() if tex != null else 0
+		check(tex != null and w >= 640 and h >= 360 and w > h, "背景能加载，而且是横图（%s %dx%d）" % [id, w, h])
+		if id == "home":
+			home = loc
+	var attic := Evening.background_path(home, {"housing": "attic"})
+	var mansion := Evening.background_path(home, {"housing": "mansion"})
+	check(attic.ends_with("home_attic.jpg") and mansion == attic, "宅邸还没单独的图，回退到阁楼")
 
 
 func _test_evening_flow() -> void:

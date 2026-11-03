@@ -19,7 +19,7 @@
 		"extra_rest_stress": -6
 	},
 	"housing": [
-		{"id": "attic", "name": "阁楼", "cost": 0, "sleep_hp": 0, "sleep_stress": 0, "invite": false, "blurb": "交易所塔楼对面的小阁楼，屋顶偶尔漏雨。"},
+		{"id": "attic", "name": "阁楼", "cost": 0, "sleep_hp": 0, "sleep_stress": 0, "invite": false, "background": "res://assets/backgrounds/city/home_attic.jpg", "blurb": "交易所塔楼对面的小阁楼，屋顶偶尔漏雨。"},
 		{"id": "apartment", "name": "公寓", "cost": 15000, "sleep_hp": 6, "sleep_stress": 3, "invite": false, "blurb": "学院区的一间公寓，终于有一张不咯吱响的床。"},
 		{"id": "mansion", "name": "宅邸", "cost": 90000, "sleep_hp": 12, "sleep_stress": 6, "invite": true, "blurb": "贵族区边缘的宅邸，客厅够请客了。"},
 		{"id": "estate", "name": "浮空庄园", "cost": 320000, "sleep_hp": 18, "sleep_stress": 10, "invite": true, "blurb": "停在云上的庄园。第一章几乎买不起。"}
@@ -36,13 +36,13 @@
 		{"id": "noble", "name": "贵族礼服", "cost": 24000, "fame": 8, "salon": true, "blurb": "绣金线的礼服，贵族沙龙认这个。"}
 	],
 	"locations": [
-		{"id": "home", "name": "住所", "area": "下城边缘", "x": 0.04, "y": 0.56, "w": 0.28, "h": 0.38, "color": "#e4c98a", "blurb": "今晚回自己的住处。什么都不做直接睡觉，就等于早点休息。", "actions": ["rest", "review", "upgrade_housing", "invite"]},
-		{"id": "downtown", "name": "下城", "area": "酒馆与黑鸦", "x": 0.04, "y": 0.06, "w": 0.28, "h": 0.46, "color": "#d2b8dc", "blurb": "酒馆、报社的后门和黑鸦商会的暗门都在这条街上。小游戏还没开张。", "actions": ["visit_mia", "tavern", "entertain", "insider"]},
-		{"id": "academy", "name": "学院区", "area": "帝国魔导学院", "x": 0.36, "y": 0.06, "w": 0.30, "h": 0.36, "color": "#b7d4ee", "blurb": "图书馆的灯还亮着。进修让判断慢慢变准，最多相当于正确率 +10%，界面上不显示那个数字。", "actions": ["study"]},
-		{"id": "industry", "name": "魔导工业区", "area": "工坊与精炼厂", "x": 0.70, "y": 0.06, "w": 0.26, "h": 0.36, "color": "#e0cbb0", "blurb": "艾尔德魔导工坊的烟囱还在冒白烟。车间门关着。", "actions": ["investigate_elder"]},
-		{"id": "avenue", "name": "金穗大道", "area": "交易所与银行", "x": 0.36, "y": 0.46, "w": 0.30, "h": 0.24, "color": "#f0d48a", "blurb": "皇家交易所已经打烊。帝国银行的灯还亮着，柜台上写着融资业务以后才开办。", "actions": ["charity", "upgrade_transport"]},
-		{"id": "harbor", "name": "港区", "area": "龙运码头", "x": 0.70, "y": 0.46, "w": 0.26, "h": 0.24, "color": "#9ec8d8", "blurb": "龙脊运输的飞龙在码头上歇着，翅膀收得整整齐齐。", "actions": ["investigate_dragonspine"]},
-		{"id": "noble", "name": "贵族区", "area": "沙龙与歌剧院", "x": 0.36, "y": 0.74, "w": 0.60, "h": 0.20, "color": "#f0c6d4", "blurb": "灯火通明。有人说格兰兹家的维多利亚也在这一带，今晚未必见得到本人。", "actions": ["salon", "upgrade_wardrobe"]}
+		{"id": "home", "name": "住所", "area": "下城边缘", "x": 0.04, "y": 0.56, "w": 0.28, "h": 0.38, "color": "#e4c98a", "background": "res://assets/backgrounds/city/home_attic.jpg", "background_track": "housing", "blurb": "今晚回自己的住处。什么都不做直接睡觉，就等于早点休息。", "actions": ["rest", "review", "upgrade_housing", "invite"]},
+		{"id": "downtown", "name": "下城", "area": "酒馆与黑鸦", "x": 0.04, "y": 0.06, "w": 0.28, "h": 0.46, "color": "#d2b8dc", "background": "res://assets/backgrounds/city/lower_town.jpg", "blurb": "酒馆、报社的后门和黑鸦商会的暗门都在这条街上。小游戏还没开张。", "actions": ["visit_mia", "tavern", "entertain", "insider"]},
+		{"id": "academy", "name": "学院区", "area": "帝国魔导学院", "x": 0.36, "y": 0.06, "w": 0.30, "h": 0.36, "color": "#b7d4ee", "background": "res://assets/backgrounds/city/academy.jpg", "blurb": "图书馆的灯还亮着。进修让判断慢慢变准，最多相当于正确率 +10%，界面上不显示那个数字。", "actions": ["study"]},
+		{"id": "industry", "name": "魔导工业区", "area": "工坊与精炼厂", "x": 0.70, "y": 0.06, "w": 0.26, "h": 0.36, "color": "#e0cbb0", "background": "res://assets/backgrounds/city/industrial.jpg", "blurb": "艾尔德魔导工坊的烟囱还在冒白烟。车间门关着。", "actions": ["investigate_elder"]},
+		{"id": "avenue", "name": "金穗大道", "area": "交易所与银行", "x": 0.36, "y": 0.46, "w": 0.30, "h": 0.24, "color": "#f0d48a", "background": "res://assets/backgrounds/city/golden_avenue.jpg", "blurb": "皇家交易所已经打烊。帝国银行的灯还亮着，柜台上写着融资业务以后才开办。", "actions": ["charity", "upgrade_transport"]},
+		{"id": "harbor", "name": "港区", "area": "龙运码头", "x": 0.70, "y": 0.46, "w": 0.26, "h": 0.24, "color": "#9ec8d8", "background": "res://assets/backgrounds/city/harbor.jpg", "blurb": "龙脊运输的飞龙在码头上歇着，翅膀收得整整齐齐。", "actions": ["investigate_dragonspine"]},
+		{"id": "noble", "name": "贵族区", "area": "沙龙与歌剧院", "x": 0.36, "y": 0.74, "w": 0.60, "h": 0.20, "color": "#f0c6d4", "background": "res://assets/backgrounds/city/noble.jpg", "blurb": "灯火通明。有人说格兰兹家的维多利亚也在这一带，今晚未必见得到本人。", "actions": ["salon", "upgrade_wardrobe"]}
 	],
 	"actions": {
 		"rest": {
