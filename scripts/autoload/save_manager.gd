@@ -7,7 +7,7 @@ extends Node
 ## - 用 JSON 而不是 .tres/.res：Resource 加载时可能执行嵌入脚本，分享存档不安全
 
 const FORMAT := "stock-life-save"
-const SAVE_VERSION := 2
+const SAVE_VERSION := 3
 const EXT := ".stocklife.json"
 const AUTOSAVE_NAME := "autosave"
 const MANUAL_SAVE_NAME := "slot1"
@@ -197,6 +197,14 @@ static func migrate(doc: Dictionary) -> Dictionary:
 				fl["tut_intro"] = true
 				fl["tutorial"] = true
 				data["flags"] = fl
+				doc["data"] = data
+			2:
+				# M2 晚间：住所 / 交通 / 服装和进行中的城区由 Life.normalize 与 apply_save_data 补默认值。
+				# 版本 2 的存档停在收盘，还没花过行动点，这里显式写成「当晚还没开始」。
+				var data2: Dictionary = doc.get("data", {})
+				if not data2.has("evening"):
+					data2["evening"] = {"active": false}
+				doc["data"] = data2
 			_:
 				pass
 		v += 1

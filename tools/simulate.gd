@@ -20,6 +20,7 @@ const Market := preload("res://scripts/core/market.gd")
 const Portfolio := preload("res://scripts/core/portfolio.gd")
 const Events := preload("res://scripts/core/events.gd")
 const Life := preload("res://scripts/core/life.gd")
+const Evening := preload("res://scripts/core/evening.gd")
 const Predict := preload("res://scripts/core/predict.gd")
 
 const STRATEGIES := ["hold", "random", "predict", "contrarian", "news", "news_predict"]
@@ -274,9 +275,14 @@ func _play(strat: String, game_seed: int, cash: float, deadline: int) -> Diction
 		var equity1 := pf.cash + pf.holdings_value(m)
 		Life.end_trading_day(player, equity1 / equity0 - 1.0 if equity0 > 0.0 else 0.0, -1)
 		var nd := Calendar.next_trading_day(d)
-		var lrng := RandomNumberGenerator.new()
-		lrng.seed = hash([game_seed, d, "life"])
-		Life.sleep(player, lrng, nd - d - 1, "rest")
+		if strat == "predict":
+			# 只靠预测的策略会去学院进修（再休息一次把觉补上）。读报的策略不花这笔钱：
+			# 报纸已经是主要优势，学费和少睡会把刚好还清的局拖下去。
+			_bot_evenings(player, pf, d, game_seed)
+		else:
+			var lrng := RandomNumberGenerator.new()
+			lrng.seed = hash([game_seed, d, "life"])
+			Life.sleep(player, lrng, nd - d - 1, "rest")
 		player.predictionsLeft = Life.predictions_per_day(player)
 		d += 1
 	var value := pf.cash
@@ -379,6 +385,39 @@ func _confirm(m: Market, ev: Events, player: Dictionary, d: int, id: String, pen
 	Life.spend_prediction(player)
 	pending.append(pr)
 	return String(pr.dir) != "down" or Life.accuracy(player) < 0.5
+
+
+## 预测类策略的晚间：进修一次（经验满或钱紧或身体不行就跳过），然后如果还剩行动点就休息一次。
+## 什么都不做则按「早点休息」结算。不买住所和车，避免把还债的本金花掉。
+func _bot_evenings(player: Dictionary, pf: Portfolio, start_day: int, game_seed: int) -> void:
+	var day_cursor := start_day
+	var kind := "weekday"
+	for _guard in 8:
+		var session := Evening.begin(player, kind)
+		_bot_spend(session, player, pf)
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash([game_seed, day_cursor, "life"])
+		Life.sleep(player, rng, 1 if kind == "offday" else 0, Evening.sleep_log(session))
+		day_cursor += 1
+		if Calendar.is_trading_day(day_cursor):
+			break
+		kind = "offday"
+
+
+func _bot_spend(session: Dictionary, player: Dictionary, pf: Portfolio) -> void:
+	if String(player.body) in ["fever", "hospital"]:
+		return
+	var cost := int(Evening.action_def("study").get("gold", 80))
+	if int(player.exp) >= int(Evening.rules().get("exp_cap", 100)):
+		return
+	if int(player.hp) < 58 or pf.cash < float(cost) + 1.0:
+		return
+	var affection := {}
+	var flags := {}
+	if not bool(Evening.perform(session, player, pf, affection, flags, "study").ok):
+		return
+	if int(session.ap) > 0:
+		Evening.perform(session, player, pf, affection, flags, "rest")
 
 
 # ---------------------------------------------------------------- 工具

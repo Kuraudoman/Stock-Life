@@ -10,6 +10,7 @@ const Market := preload("res://scripts/core/market.gd")
 const Portfolio := preload("res://scripts/core/portfolio.gd")
 const Events := preload("res://scripts/core/events.gd")
 const Life := preload("res://scripts/core/life.gd")
+const Evening := preload("res://scripts/core/evening.gd")
 const Predict := preload("res://scripts/core/predict.gd")
 const Noelle := preload("res://scripts/core/noelle.gd")
 
@@ -24,7 +25,7 @@ const PAPER_MAX := 5
 ## 诺艾尔复盘时看多少个交易日之内的风声。
 const TIP_DAYS := 3
 
-enum Phase { PRE_OPEN, TRADING, CLOSED }
+enum Phase { PRE_OPEN, TRADING, CLOSED, EVENING }
 
 var companies: Array = []
 var chapter: Dictionary = {}
@@ -59,6 +60,8 @@ var chapter_state := "active"
 var chapter_result := {}
 var last_summary := {}
 var evening_choice := ""
+## 城市地图进行中的一晚。active 为 false 时还没进城区，或已经睡完。
+var evening := {"active": false}
 var traded_today := false
 var has_game := false
 
@@ -124,6 +127,7 @@ func new_game(p_seed: int = -1, p_name: String = "", tutorial: bool = true) -> v
 	chapter_result = {}
 	last_summary = {}
 	evening_choice = ""
+	evening = {"active": false}
 	selected_id = String(companies[0].id) if not companies.is_empty() else ""
 	phase = Phase.PRE_OPEN
 	has_game = true
@@ -140,6 +144,7 @@ func _start_day() -> void:
 	day_start_equity = equity()
 	traded_today = false
 	evening_choice = ""
+	evening = {"active": false}
 	_build_paper()
 
 
@@ -237,15 +242,15 @@ func close_market() -> Dictionary:
 					Portfolio.fmt_money(debt_gap()))
 	last_summary = summary
 	EventBus.player_changed.emit()
-	# 期限那天失败时不覆盖自动存档：标题画面的「继续」会回到前一天收盘，可以再试一次
+	# 期限那天失败时不覆盖自动存档：标题画面的「继续」会回到期限当天开盘前，可以再试一次
 	if chapter_state != "failed":
 		SaveManager.autosave()
 	EventBus.market_closed.emit(summary)
 	return summary
 
 
-## 晚间安排：rest（早点休息）或 review（和诺艾尔复盘）。复盘返回诺艾尔的分析（若干句）。
-## 发烧时只能休息。
+## 旧接口：一晚只做一件事，rest 或 review。测试和「直接跳过城区」的脚本还在用。
+## 发烧时只能休息。玩家界面走 open_evening / perform_evening_action。
 func choose_evening(choice: String) -> Array:
 	if phase != Phase.CLOSED:
 		return []
@@ -255,9 +260,124 @@ func choose_evening(choice: String) -> Array:
 	if choice != "review":
 		return []
 	affection["noelle"] = mini(100, int(affection.get("noelle", 0)) + int(chapter.get("review_affection", 3)))
+	return _noelle_tips()
+
+
+func _noelle_tips() -> Array:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = hash([seed_value, day, "tips"])
-	return Noelle.tips(noelle_lines, events.upcoming_clues(day, TIP_DAYS), day, int(affection.noelle), events.shorts, rng)
+	return Noelle.tips(noelle_lines, events.upcoming_clues(day, TIP_DAYS), day, int(affection.get("noelle", 0)), events.shorts, rng)
+
+
+func _review_lines() -> Array:
+	var lines: Array = [{"who": "noelle", "expr": "normal", "text": _line_pick(noelle_lines.get("review_open", ["……"]))}]
+	for tip in _noelle_tips():
+		lines.append({"who": "noelle", "expr": "normal", "text": String(tip)})
+	lines.append({"who": "noelle", "expr": "smile", "text": _line_pick(noelle_lines.get("review_close", ["……"]))})
+	return lines
+
+
+func _line_pick(list: Array) -> String:
+	return String(list[randi() % list.size()]) if not list.is_empty() else ""
+
+
+## 收盘后或休市日进入城市地图。kind 省略时按今天是不是交易日决定行动点。
+func open_evening(kind: String = "") -> Dictionary:
+	if chapter_state == "failed":
+		return {}
+	var k := kind
+	if k == "":
+		k = "offday" if not Calendar.is_trading_day(day) else "weekday"
+	evening = Evening.begin(player, k)
+	phase = Phase.EVENING
+	evening_choice = ""
+	return evening_snapshot()
+
+
+func evening_snapshot() -> Dictionary:
+	return Evening.snapshot(evening, player, portfolio.cash)
+
+
+## 在城市地图上做一个行动。复盘会附上诺艾尔的对话行。
+func perform_evening_action(action_id: String) -> Dictionary:
+	if phase != Phase.EVENING:
+		return {"ok": false, "code": "closed", "reason": "现在不是晚间"}
+	var result := Evening.perform(evening, player, portfolio, affection, flags, action_id)
+	if bool(result.get("ok", false)):
+		if String(result.get("kind", "")) == "review":
+			result.lines = _review_lines()
+		var log := String(result.get("log", ""))
+		if log != "":
+			EventBus.message_posted.emit("【晚间】" + log, "info")
+		EventBus.player_changed.emit()
+	return result
+
+
+## 结束今晚并睡觉。后面如果是休市日，再开一晚（another=true），否则进入下一个交易日。
+func finish_evening() -> Dictionary:
+	if phase != Phase.EVENING or chapter_state == "failed":
+		return {"another": false, "notes": [], "tutorial": {}}
+	var mood_before := String(player.mood)
+	var body_before := String(player.body)
+	var kind := String(evening.get("kind", "weekday"))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([seed_value, day, "life"])
+	var changes := Life.sleep(player, rng, 1 if kind == "offday" else 0, Evening.sleep_log(evening))
+	player.predictionsLeft = Life.predictions_per_day(player)
+	var notes := _life_notes(changes)
+	day += 1
+	if not Calendar.is_trading_day(day):
+		open_evening("offday")
+		var line := "【日历】%s 休市。今晚有 %d 个行动点，可以在城里多待一会。" % [Calendar.format_date(day), int(evening.get("ap_max", 0))]
+		EventBus.message_posted.emit(line, "info")
+		notes.append(line)
+		var tut := consume_tutorial("weekend")
+		EventBus.player_changed.emit()
+		if chapter_state != "failed":
+			SaveManager.autosave()
+		return {"another": true, "notes": notes, "tutorial": tut, "day": day}
+	phase = Phase.PRE_OPEN
+	_start_day()
+	EventBus.player_changed.emit()
+	EventBus.day_started.emit(day)
+	if String(player.mood) != "calm" or String(player.body) != "healthy":
+		if mood_before != String(player.mood) or body_before != String(player.body) or String(player.body) != "healthy":
+			request_tutorial("state")
+	if String(player.body) == "hospital":
+		request_tutorial("hospital")
+	if chapter_state == "active" and trading_days_left() <= 5 and debt_gap() > 0.0:
+		request_tutorial("deadline")
+	if chapter_state != "failed":
+		SaveManager.autosave()
+	return {"another": false, "notes": notes, "tutorial": {}, "day": day}
+
+
+## 给城市地图自己弹教学用。和 request_tutorial 一样只出现一次，但不会排进主界面的队列。
+func consume_tutorial(id: String) -> Dictionary:
+	if not dialogues.has(id) or flags.has("tut_" + id):
+		return {}
+	if not tutorial_enabled() and not id in ["intro", "cleared", "failed"]:
+		return {}
+	flags["tut_" + id] = true
+	return dialogues[id]
+
+
+func _life_notes(changes: Array) -> Array:
+	var out: Array = []
+	for c in changes:
+		var msg: String = {
+			"cold": "【身体】%s着凉感冒了。今天只能预测 1 次，体力恢复减半。",
+			"fever": "【身体】感冒没休息好，%s发烧了！今晚只能休息。",
+			"fever_down": "【身体】%s退烧了，但感冒还没好。",
+			"recovered": "【身体】%s的感冒好了。",
+			"released": "【身体】%s出院了。",
+		}.get(c, "")
+		if msg == "":
+			continue
+		msg = msg % player.name
+		EventBus.message_posted.emit(msg, "warn")
+		out.append(msg)
+	return out
 
 
 ## 进入下一个交易日（跳过周末与节日），中间睡觉恢复。
@@ -277,16 +397,7 @@ func next_day() -> void:
 	player.predictionsLeft = Life.predictions_per_day(player)
 	day = next
 	phase = Phase.PRE_OPEN
-	for c in changes:
-		var msg: String = {
-			"cold": "【身体】%s着凉感冒了。今天只能预测 1 次，体力恢复减半。",
-			"fever": "【身体】感冒没休息好，%s发烧了！今晚只能休息。",
-			"fever_down": "【身体】%s退烧了，但感冒还没好。",
-			"recovered": "【身体】%s的感冒好了。",
-			"released": "【身体】%s出院了。",
-		}.get(c, "")
-		if msg != "":
-			EventBus.message_posted.emit(msg % player.name, "warn")
+	_life_notes(changes)
 	_start_day()
 	EventBus.player_changed.emit()
 	EventBus.day_started.emit(day)
@@ -501,7 +612,16 @@ func equity() -> float:
 
 
 func phase_name() -> String:
-	return ["pre_open", "trading", "closed"][phase]
+	match phase:
+		Phase.PRE_OPEN:
+			return "pre_open"
+		Phase.TRADING:
+			return "trading"
+		Phase.CLOSED:
+			return "closed"
+		Phase.EVENING:
+			return "evening"
+	return "pre_open"
 
 
 func select_stock(id: String) -> void:
@@ -572,7 +692,18 @@ func time_label() -> String:
 			return "开盘前"
 		Phase.CLOSED:
 			return "已收盘"
+		Phase.EVENING:
+			return "晚间"
 	return Calendar.format_tick(market.tick)
+
+
+func asset_summary() -> String:
+	return "%s · %s · %s · 进修 %d" % [
+		Evening.tier(player, "housing").get("name", "阁楼"),
+		Evening.tier(player, "transport").get("name", "步行"),
+		Evening.tier(player, "wardrobe").get("name", "平民服"),
+		int(player.get("exp", 0)),
+	]
 
 
 func chapter_label() -> String:
@@ -621,6 +752,7 @@ func to_save_data() -> Dictionary:
 		"chapterResult": chapter_result.duplicate(true),
 		"lastSummary": last_summary.duplicate(true),
 		"eveningChoice": evening_choice,
+		"evening": evening.duplicate(true),
 		"tradedToday": traded_today,
 	}
 
@@ -650,8 +782,17 @@ func apply_save_data(d: Dictionary) -> void:
 			phase = Phase.TRADING
 		"closed":
 			phase = Phase.CLOSED
+		"evening":
+			phase = Phase.EVENING
 		_:
 			phase = Phase.PRE_OPEN
+	evening = d.get("evening", {"active": false}).duplicate(true)
+	if typeof(evening) != TYPE_DICTIONARY:
+		evening = {"active": false}
+	evening.active = bool(evening.get("active", false))
+	if evening.active:
+		for k in ["ap", "ap_max", "rests", "hp_delta", "stress_delta"]:
+			evening[k] = int(evening.get(k, 0))
 	day_start_equity = float(d.get("dayStartEquity", equity()))
 	predictions = d.get("predictions", []).duplicate(true)
 	for pred in predictions:

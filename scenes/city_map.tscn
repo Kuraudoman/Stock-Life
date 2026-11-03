@@ -1,0 +1,149 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/city_map.gd" id="1_map"]
+[ext_resource type="Script" path="res://scripts/ui/city_canvas.gd" id="2_canvas"]
+[ext_resource type="Script" path="res://scripts/ui/portrait_view.gd" id="3_portrait"]
+
+[node name="CityMap" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_map")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.16, 0.22, 0.32, 0.45)
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="Panel" type="PanelContainer" parent="Margin"]
+layout_mode = 2
+theme_type_variation = &"FeaturePanel"
+
+[node name="VBox" type="VBoxContainer" parent="Margin/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="Margin/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Margin/Panel/VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.659, 0.345, 0.122, 1)
+theme_override_font_sizes/font_size = 18
+text = "4月1日 周一 · 晚间"
+
+[node name="ApLabel" type="Label" parent="Margin/Panel/VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "行动点 2 / 2"
+
+[node name="StatsLabel" type="Label" parent="Margin/Panel/VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.549, 0.451, 0.341, 1)
+theme_override_font_sizes/font_size = 13
+text = "体力 100  压力 20  名声 0  进修 0/100"
+autowrap_mode = 2
+
+[node name="Body" type="HBoxContainer" parent="Margin/Panel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="Map" type="Control" parent="Margin/Panel/VBox/Body"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(560, 420)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("2_canvas")
+
+[node name="Side" type="VBoxContainer" parent="Margin/Panel/VBox/Body"]
+custom_minimum_size = Vector2(340, 0)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="HeroRow" type="HBoxContainer" parent="Margin/Panel/VBox/Body/Side"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Heroine" type="Control" parent="Margin/Panel/VBox/Body/Side/HeroRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 120)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("3_portrait")
+follow_state = true
+
+[node name="PlaceTitle" type="Label" parent="Margin/Panel/VBox/Body/Side"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.659, 0.345, 0.122, 1)
+theme_override_font_sizes/font_size = 18
+text = "住所"
+
+[node name="PlaceBlurb" type="Label" parent="Margin/Panel/VBox/Body/Side"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "……"
+autowrap_mode = 3
+
+[node name="Actions" type="VBoxContainer" parent="Margin/Panel/VBox/Body/Side"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Log" type="RichTextLabel" parent="Margin/Panel/VBox/Body/Side"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/normal_font_size = 13
+bbcode_enabled = false
+text = "今晚还没安排。"
+scroll_following = true
+
+[node name="Footer" type="HBoxContainer" parent="Margin/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="HintLabel" type="Label" parent="Margin/Panel/VBox/Footer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.549, 0.451, 0.341, 1)
+theme_override_font_sizes/font_size = 13
+text = "什么都不做直接睡觉，等于早点休息。"
+autowrap_mode = 3
+
+[node name="EndButton" type="Button" parent="Margin/Panel/VBox/Footer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 40)
+layout_mode = 2
+focus_mode = 0
+text = "结束今晚，回去睡觉 ▶"

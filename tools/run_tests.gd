@@ -1,5 +1,5 @@
 extends SceneTree
-## 自动测试：价格模型可复现、涨跌停、交易规则、存档往返；M1：新闻事件、主角状态、走势预测、诺艾尔、第一章胜负、存档迁移。
+## 自动测试：价格模型可复现、涨跌停、交易规则、存档往返；M1：新闻、状态、预测、诺艾尔、第一章、存档迁移；M2：晚间行动点与版本 2 → 3。
 ## 用法：godot --headless --path . --script res://tools/run_tests.gd
 
 const Calendar := preload("res://scripts/core/calendar.gd")
@@ -7,6 +7,7 @@ const Market := preload("res://scripts/core/market.gd")
 const Portfolio := preload("res://scripts/core/portfolio.gd")
 const Events := preload("res://scripts/core/events.gd")
 const Life := preload("res://scripts/core/life.gd")
+const Evening := preload("res://scripts/core/evening.gd")
 const Predict := preload("res://scripts/core/predict.gd")
 const Noelle := preload("res://scripts/core/noelle.gd")
 
@@ -24,6 +25,7 @@ func _initialize() -> void:
 	_test_shocks(companies)
 	_test_events(companies)
 	_test_life()
+	_test_evening_logic()
 	_test_predict_decide()
 	_test_noelle(companies)
 	await process_frame
@@ -31,6 +33,8 @@ func _initialize() -> void:
 	_test_forecast_matches_reality()
 	_test_chapter()
 	_test_save_v2_and_migration()
+	_test_evening_flow()
+	_test_save_v3()
 	print("")
 	print("通过 %d 项，失败 %d 项" % [passes, failures])
 	quit(1 if failures > 0 else 0)
@@ -426,6 +430,243 @@ func _test_life() -> void:
 			"每次预测消耗体力，每天最多 3 次")
 
 
+func _test_evening_logic() -> void:
+	print("晚间行动")
+	var fresh := Life.new_player("测试")
+	check(Evening.action_points(fresh, "weekday") == 2 and Evening.action_points(fresh, "offday") == 4, "工作日 2 点，休市日 4 点")
+	fresh.body = "tired"
+	check(Evening.action_points(fresh, "weekday") == 1 and Evening.action_points(fresh, "offday") == 3, "疲劳时行动点 −1")
+	fresh.body = "healthy"
+	fresh.transport = "carriage"
+	check(Evening.action_points(fresh, "weekday") == 3, "马车 +1 行动点")
+	fresh.transport = "dragon"
+	check(Evening.action_points(fresh, "weekday") == 4, "飞龙不再超过 +2")
+	fresh.transport = "walk"
+	fresh.body = "hospital"
+	check(Evening.action_points(fresh, "offday") == 0, "住院不能出门")
+	var fever := Life.new_player("测试")
+	fever.body = "fever"
+	var session := Evening.begin(fever, "weekday")
+	var pf := Portfolio.new()
+	pf.cash = 1000.0
+	var aff := {}
+	var flags := {}
+	var blocked: Dictionary = Evening.perform(session, fever, pf, aff, flags, "study")
+	check(not bool(blocked.ok) and String(blocked.code) == "fever", "发烧时只能休息")
+	check(bool(Evening.perform(session, fever, pf, aff, flags, "rest").ok), "发烧时可以休息")
+	# 什么都不做 = 旧版早点休息
+	var left := Life.new_player("甲")
+	var right := Life.new_player("乙")
+	Life.end_trading_day(left, 0.0, 10)
+	Life.end_trading_day(right, 0.0, 10)
+	var rng_a := RandomNumberGenerator.new()
+	var rng_b := RandomNumberGenerator.new()
+	rng_a.seed = 7
+	rng_b.seed = 7
+	Life.sleep(left, rng_a, 0, "rest")
+	var blank := Evening.begin(right, "weekday")
+	Life.sleep(right, rng_b, 0, Evening.sleep_log(blank))
+	check(int(left.hp) == int(right.hp) and int(left.stress) == int(right.stress) and left.mood == right.mood and left.body == right.body,
+			"什么都不做直接睡觉，和旧版「早点休息」一样")
+	# 复盘的体力和压力也对齐旧接口
+	var rev_new := Life.new_player("丙")
+	var rev_old := Life.new_player("丁")
+	pf.cash = 5000.0
+	var srev := Evening.begin(rev_new, "weekday")
+	Evening.perform(srev, rev_new, pf, aff, flags, "review")
+	rng_a.seed = 9
+	rng_b.seed = 9
+	Life.sleep(rev_new, rng_a, 0, Evening.sleep_log(srev))
+	Life.sleep(rev_old, rng_b, 0, "review")
+	check(int(rev_new.hp) == int(rev_old.hp) and int(rev_new.stress) == int(rev_old.stress), "复盘的体力压力和旧接口一致")
+	check(int(aff.get("noelle", 0)) == int(Evening.action_def("review").affection.noelle), "复盘增加诺艾尔好感")
+	# 进修、上限、第二次不行
+	var student := Life.new_player("戊")
+	var study := Evening.begin(student, "weekday")
+	var tuition := int(Evening.action_def("study").gold)
+	pf.cash = 400.0
+	var did: Dictionary = Evening.perform(study, student, pf, aff, flags, "study")
+	check(bool(did.ok) and int(student.exp) == int(Evening.action_def("study").exp) and absf(pf.cash - (400.0 - tuition)) < 0.01, "进修花钱、加经验")
+	var again: Dictionary = Evening.perform(study, student, pf, aff, flags, "study")
+	check(not bool(again.ok) and String(again.code) == "once", "同一晚不能进修两次")
+	student.exp = 100
+	var capped := Evening.begin(student, "weekday")
+	check(String(Evening.perform(capped, student, pf, aff, flags, "study").code) == "exp_cap", "进修到顶就不再加")
+	var genius := Life.new_player("己")
+	genius.exp = 100
+	check(absf(Life.accuracy(genius) - 0.80) < 0.001, "经验 100：正确率 +10%，到此为止")
+	genius.exp = 250
+	check(absf(Life.accuracy(genius) - 0.80) < 0.001, "经验超过 100 也不会再加")
+	# 乐观时社交好感多 1
+	var sunny := Life.new_player("庚")
+	sunny.mood = "optimistic"
+	var aff2 := {"mia": 0}
+	var visit := Evening.begin(sunny, "weekday")
+	Evening.perform(visit, sunny, pf, aff2, flags, "visit_mia")
+	check(int(aff2.mia) == 3 and int(flags.get("hook_rumor_mia", 0)) == 1, "乐观时拜访米娅，好感多 1，并记下传闻钩子")
+	# 内幕锁着，调查度不动
+	var heat_before := int(sunny.heat)
+	var insider: Dictionary = Evening.perform(visit, sunny, pf, aff2, flags, "insider")
+	check(not bool(insider.ok) and String(insider.code) == "locked" and int(sunny.heat) == heat_before, "内幕还没开，调查度不变")
+	check(not bool(Evening.resolve_hook("rival", {}).implemented), "对手大户的钩子还是空的")
+	# 沙龙要名声或礼服
+	var poor := Life.new_player("辛")
+	var salon := Evening.begin(poor, "weekday")
+	check(String(Evening.perform(salon, poor, pf, aff2, flags, "salon").code) == "locked", "名声不够进不了沙龙")
+	poor.fame = 25
+	check(bool(Evening.perform(salon, poor, pf, aff2, flags, "salon").ok) and int(flags.get("hook_rival_victoria", 0)) == 1, "名声够了可以进沙龙，只记一笔，不下单")
+	# 升级交通，下一晚行动点变多；住所让觉更好睡
+	var up := Life.new_player("壬")
+	up.hp = 40
+	pf.cash = 20000.0
+	var shop := Evening.begin(up, "weekday")
+	check(bool(Evening.perform(shop, up, pf, aff2, flags, "upgrade_transport").ok) and String(up.transport) == "carriage", "可以买马车")
+	check(Evening.action_points(up, "weekday") == 3, "买完马车，下一晚行动点变多")
+	var sleeper := Life.new_player("癸")
+	sleeper.hp = 40
+	var homebody := Life.new_player("子")
+	homebody.hp = 40
+	homebody.housing = "apartment"
+	var ra := RandomNumberGenerator.new()
+	var rb := RandomNumberGenerator.new()
+	ra.seed = 3
+	rb.seed = 3
+	Life.sleep(sleeper, ra, 0, Evening.sleep_log(Evening.begin(sleeper, "weekday")))
+	Life.sleep(homebody, rb, 0, Evening.sleep_log(Evening.begin(homebody, "weekday")))
+	check(int(homebody.hp) == int(sleeper.hp) + 6, "公寓每晚多恢复 6 点体力")
+	# 多休息一次，恢复更多
+	var nap := Life.new_player("丑")
+	nap.hp = 40
+	nap.stress = 40
+	var twice := Evening.begin(nap, "offday")
+	Evening.perform(twice, nap, pf, aff2, flags, "rest")
+	Evening.perform(twice, nap, pf, aff2, flags, "rest")
+	var once_p := Life.new_player("寅")
+	once_p.hp = 40
+	once_p.stress = 40
+	ra.seed = 4
+	rb.seed = 4
+	Life.sleep(nap, ra, 1, Evening.sleep_log(twice))
+	Life.sleep(once_p, rb, 1, Evening.sleep_log(Evening.begin(once_p, "offday")))
+	check(int(nap.hp) > int(once_p.hp) and int(nap.stress) < int(once_p.stress), "休市日多休息一次，体力更多、压力更低")
+	# 悲观时亏钱，压力升得更快；大赚涨名声
+	var calm_p := Life.new_player("卯")
+	var sad_p := Life.new_player("辰")
+	sad_p.mood = "pessimistic"
+	Life.end_trading_day(calm_p, -0.04, 10)
+	Life.end_trading_day(sad_p, -0.04, 10)
+	check(int(sad_p.stress) > int(calm_p.stress), "悲观时，同样的亏损压力更高")
+	var rich := Life.new_player("巳")
+	Life.end_trading_day(rich, 0.06, 10)
+	check(int(rich.fame) == int(Evening.rules().fame_profit_gain), "大赚的一天会涨一点名声")
+	check(String(rich.body) == "healthy" or String(rich.body) == "tired", "收盘会重新判定身体")
+	var worn := Life.new_player("午")
+	worn.hp = 55
+	Life.end_trading_day(worn, 0.0, 10)
+	check(String(worn.body) == "tired", "收盘后体力低于 50 就是疲劳")
+
+
+func _test_evening_flow() -> void:
+	print("晚间流程")
+	var gs := _gs()
+	var real_dir := _use_test_saves()
+	gs.new_game(4242, "晚风", false)
+	# 周一晚上什么都不做，和 choose_evening("rest") + next_day 走到同一天、同一价格
+	gs.open_market()
+	gs.finish_day()
+	# 只有一个 GameState。先把「新流程」跑完记下来，再重开用旧接口走同一晚。
+	var hp_before := int(gs.player.hp)
+	gs.open_evening("weekday")
+	check(gs.phase == gs.Phase.EVENING and int(gs.evening.ap) == 2, "收盘后进入晚间，2 个行动点")
+	var done: Dictionary = gs.finish_evening()
+	check(not bool(done.another) and gs.day == 2 and gs.phase == gs.Phase.PRE_OPEN, "周一晚上睡醒是周二开盘前")
+	check(int(gs.player.hp) >= hp_before, "直接睡觉恢复了体力")
+	var price_new := float(gs.market.price("elder"))
+	gs.new_game(4242, "晚风", false)
+	gs.open_market()
+	gs.finish_day()
+	gs.choose_evening("rest")
+	gs.next_day()
+	check(gs.day == 2 and absf(gs.market.price("elder") - price_new) < 1e-6, "新晚间和旧「早点休息」走到同一开盘价")
+	# 周五收盘后要连续过周六、周日
+	gs.new_game(4242, "晚风", false)
+	while gs.day < 5:
+		gs.open_market()
+		gs.finish_day()
+		gs.choose_evening("rest")
+		gs.next_day()
+	gs.open_market()
+	gs.finish_day()
+	check(gs.day == 5, "第 5 天是周五")
+	gs.open_evening("weekday")
+	var steps := 0
+	var saw_off := false
+	while true:
+		var r: Dictionary = gs.finish_evening()
+		steps += 1
+		if bool(r.another):
+			saw_off = true
+			check(int(gs.evening.ap_max) == 4, "休市日有 4 个行动点")
+		else:
+			break
+		if steps > 5:
+			break
+	check(saw_off and gs.day == 8 and gs.phase == gs.Phase.PRE_OPEN, "过完周末回到周一（第 8 天）")
+	# 进修会进存档
+	gs.open_evening("weekday")
+	var studied: Dictionary = gs.perform_evening_action("study")
+	check(bool(studied.ok) and int(gs.player.exp) > 0 and int(gs.evening.ap) == 1, "在城区里进修，花掉 1 点行动点")
+	var sm: Node = root.get_node("SaveManager")
+	check(sm.save_game("evening_slot"), "晚间中途可以存档")
+	var exp := int(gs.player.exp)
+	var cash := float(gs.portfolio.cash)
+	var ap := int(gs.evening.ap)
+	gs.new_game(1, "", false)
+	check(sm.load_game(sm.path_for("evening_slot")), "读回晚间存档")
+	check(gs.phase == gs.Phase.EVENING and int(gs.player.exp) == exp and absf(gs.portfolio.cash - cash) < 0.01 and int(gs.evening.ap) == ap,
+			"行动点、金币和进修都还在")
+	DirAccess.remove_absolute(sm.path_for("evening_slot"))
+	DirAccess.remove_absolute(sm.path_for("autosave"))
+	_restore_saves(real_dir)
+
+
+func _test_save_v3() -> void:
+	print("存档（M2，版本 2 → 3）")
+	var gs := _gs()
+	var sm: Node = root.get_node("SaveManager")
+	var real_dir := _use_test_saves()
+	gs.new_game(13579, "旧档", false)
+	gs.open_market()
+	gs.finish_day()
+	gs.choose_evening("rest")
+	gs.next_day()
+	var data: Dictionary = gs.to_save_data()
+	data.erase("evening")
+	data.player.erase("housing")
+	data.player.erase("transport")
+	data.player.erase("wardrobe")
+	var v2 := {
+		"format": sm.FORMAT, "saveVersion": 2, "gameVersion": "0.2.0",
+		"savedAt": "2026-11-01T12:00:00", "label": "第一章 · 第 2 天 开盘前", "data": data,
+	}
+	var path: String = sm.path_for("test_v2_evening")
+	sm.write_json_atomic(path, v2)
+	check(sm.load_game(path), "读取版本 2 的存档并升级到版本 3")
+	check(String(gs.player.housing) == "attic" and String(gs.player.transport) == "walk" and String(gs.player.wardrobe) == "plain",
+			"旧存档补上阁楼、步行和平民服")
+	check(not bool(gs.evening.get("active", true)), "旧存档的当晚还没开始")
+	gs.open_market()
+	gs.finish_day()
+	gs.open_evening("weekday")
+	check(bool(gs.perform_evening_action("study").ok), "升级后的存档可以进修")
+	check(sm.save_game("test_v3"), "写成版本 3")
+	var doc: Dictionary = sm.read_json(sm.path_for("test_v3"))
+	check(int(doc.get("saveVersion", 0)) == 3 and bool(doc.data.evening.active), "新存档版本号是 3，并且记下了正在进行的晚间")
+	for name in ["test_v2_evening", "test_v3", "autosave"]:
+		DirAccess.remove_absolute(sm.path_for(name))
+	_restore_saves(real_dir)
+
+
 func _test_predict_decide() -> void:
 	print("走势预测")
 	var rng := RandomNumberGenerator.new()
@@ -539,7 +780,7 @@ func _test_chapter() -> void:
 	gs.trade("elder", "buy", 100)
 	gs.finish_day()
 	check(gs.chapter_state == "failed" and gs.portfolio.holdings.is_empty(), "期限收盘还不清 → 卖出持仓后仍不够，失败")
-	check(not FileAccess.file_exists(root.get_node("SaveManager").path_for("autosave")), "失败时不覆盖自动存档（可以回到前一天重试）")
+	check(not FileAccess.file_exists(root.get_node("SaveManager").path_for("autosave")), "失败时不覆盖自动存档（可以再试一次）")
 	gs.next_day()
 	check(gs.day == 30, "失败后不能继续推进")
 	# 期限那天收盘：卖掉持仓够还 → 成功

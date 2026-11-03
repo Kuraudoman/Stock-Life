@@ -1,6 +1,6 @@
 extends "res://scripts/ui/overlay.gd"
-## 日结算（GDD 第 9、10 节）：当日盈亏、净资产曲线、主角状态变化、诺艾尔点评，然后选择晚间安排。
-## 关闭时返回 "rest" / "review"，期限那天返回 "final"。
+## 日结算（GDD 第 9、10 节）：当日盈亏、净资产曲线、主角状态变化、诺艾尔点评，然后去晚间城市地图。
+## 关闭时返回 "city"，期限那天返回 "final"。
 
 const UI := preload("res://scripts/ui/ui_style.gd")
 const Portfolio := preload("res://scripts/core/portfolio.gd")
@@ -12,8 +12,7 @@ const Portfolio := preload("res://scripts/core/portfolio.gd")
 @onready var deadline_label: Label = %DeadlineLabel
 @onready var noelle_text: RichTextLabel = %NoelleText
 @onready var evening_label: Label = %EveningLabel
-@onready var rest_button: Button = %RestButton
-@onready var review_button: Button = %ReviewButton
+@onready var city_button: Button = %CityButton
 @onready var final_button: Button = %FinalButton
 
 var summary := {}
@@ -62,15 +61,15 @@ func _ready() -> void:
 	deadline_label.text = String(summary.get("deadline", ""))
 	deadline_label.visible = deadline_label.text != ""
 	if not result.is_empty():
-		rest_button.visible = false
-		review_button.visible = false
+		city_button.visible = false
 		final_button.visible = true
 		evening_label.text = "今天是还款期限。渡鸦夫人的人已经在门口了……"
 		final_button.pressed.connect(func(): close("final"))
 		return
 	var body := String(GameState.player.get("body", "healthy"))
-	if body in ["fever", "hospital"]:
-		review_button.disabled = true
-		review_button.tooltip_text = "现在只能休息"
-	rest_button.pressed.connect(func(): close("rest"))
-	review_button.pressed.connect(func(): close("review"))
+	if body == "hospital":
+		city_button.text = "在医院过夜 ▶"
+		city_button.tooltip_text = "还在住院，今晚只能睡觉"
+	elif body == "fever":
+		city_button.tooltip_text = "在发烧，进城之后只能休息"
+	city_button.pressed.connect(func(): close("city"))
