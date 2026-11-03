@@ -1,0 +1,116 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/dialog_box.gd" id="1_dialog"]
+[ext_resource type="Script" path="res://scripts/ui/portrait_view.gd" id="2_portrait"]
+
+[node name="Dialog" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_dialog")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.2, 0.14, 0.08, 0.35)
+
+[node name="LeftPortrait" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 60.0
+offset_top = -470.0
+offset_right = 280.0
+offset_bottom = -180.0
+grow_vertical = 0
+script = ExtResource("2_portrait")
+
+[node name="RightPortrait" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -280.0
+offset_top = -470.0
+offset_right = -60.0
+offset_bottom = -180.0
+grow_horizontal = 0
+grow_vertical = 0
+script = ExtResource("2_portrait")
+who = "noelle"
+
+[node name="Box" type="PanelContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -184.0
+offset_right = -40.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_type_variation = &"FeaturePanel"
+
+[node name="VBox" type="VBoxContainer" parent="Box"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="NameLabel" type="Label" parent="Box/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+theme_type_variation = &"RibbonLabel"
+text = "诺艾尔"
+
+[node name="TextLabel" type="RichTextLabel" parent="Box/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 1
+theme_override_font_sizes/normal_font_size = 17
+bbcode_enabled = true
+text = "……"
+
+[node name="Bottom" type="HBoxContainer" parent="Box/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Choices" type="HBoxContainer" parent="Box/VBox/Bottom"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Spacer" type="Control" parent="Box/VBox/Bottom"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="SkipButton" type="Button" parent="Box/VBox/Bottom"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "跳过这段对话"
+focus_mode = 0
+text = "跳过"
+
+[node name="NextButton" type="Button" parent="Box/VBox/Bottom"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+tooltip_text = "继续（点击对话框、空格或回车也可以）"
+focus_mode = 0
+text = "继续 ▶"

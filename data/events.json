@@ -1,0 +1,464 @@
+{
+	"_comment": "新闻与事件（GDD 第 6 节）。effects.portions 为逐个交易日的冲击幅度（收益率），value 为基本面价值 V 的变化比例；target 为股票 id、self（财报的公司）或 all（大盘）。hints 是带方向的前兆，vague 是只说明“快有消息了”的模糊前兆。precursors 为前兆条数，stage 为盘前 / 盘中的权重。数值为初稿，用 tools/simulate.gd 平衡。",
+	"per_block": {"pool": [6, 7], "rumors": [1, 2]},
+
+	"earnings": {
+		"id": "earnings",
+		"window": [5, 15],
+		"precursors": 2,
+		"stage": {"pre_open": 2, "intraday": 1},
+		"vague": [
+			"{name}季度财报即将公布，交易所里的分析师们开始押注",
+			"{short}的会计室最近灯火通明，财报季要到了",
+			"《金穗日报》财经版：{name}财报前夕，市场观望情绪浓厚"
+		],
+		"variants": [
+			{
+				"key": "beat", "weight": 40,
+				"headline": "{name}季度财报大超预期",
+				"body": "营收与利润双双创下新高，管理层上调全年展望。",
+				"hints": [
+					"{short}的仓库最近进出货车络绎不绝，据说订单排到了秋天",
+					"有人看到{short}的高管在酒馆里请全场喝酒，心情好得不得了",
+					"{name}的供应商透露：这个季度的采购量比去年翻了一倍"
+				],
+				"effects": [{"target": "self", "portions": [0.075, 0.045], "value": 0.10}]
+			},
+			{
+				"key": "inline", "weight": 30,
+				"headline": "{name}季度财报符合预期",
+				"body": "业绩平稳，没有惊喜也没有意外。",
+				"hints": [
+					"同业人士估计{short}这个季度不好不坏，大概和去年差不多",
+					"{short}的员工说这个季度“和平常一样忙”"
+				],
+				"effects": [{"target": "self", "portions": [0.01], "value": 0.0}]
+			},
+			{
+				"key": "miss", "weight": 30,
+				"headline": "{name}季度财报不及预期",
+				"body": "成本上升侵蚀利润，管理层下调全年展望。",
+				"hints": [
+					"{short}据说正在悄悄削减加班费，工人们怨声载道",
+					"有债主看到{short}的财务主管连夜出入帝国银行",
+					"{name}的大客户据传砍掉了一半的订单"
+				],
+				"effects": [{"target": "self", "portions": [-0.07, -0.035], "value": -0.09}]
+			}
+		]
+	},
+
+	"rate": {
+		"id": "rate",
+		"every": 90, "first": 15, "jitter": 5,
+		"precursors": 2,
+		"stage": {"pre_open": 1, "intraday": 1},
+		"vague": [
+			"帝国铸币局本月议息会议临近，各大商社屏息以待",
+			"铸币局总裁取消了下周的公开行程，利率决议恐怕就在眼前"
+		],
+		"variants": [
+			{
+				"key": "cut", "weight": 40,
+				"headline": "帝国铸币局宣布下调金币利率",
+				"body": "铸币局称将“全力支持魔导产业扩张”，借钱更便宜了，全市场应声上涨。",
+				"hints": [
+					"铸币局副总裁演讲：“魔导产业需要更宽松的资金环境”",
+					"帝国银行悄悄下调了几家大商社的贷款利息，消息人士称是“上面的意思”"
+				],
+				"effects": [{"target": "all", "portions": [0.035, 0.02], "value": 0.04}]
+			},
+			{
+				"key": "hold", "weight": 35,
+				"headline": "帝国铸币局维持金币利率不变",
+				"body": "铸币局表示“继续观察经济形势”，市场反应平淡。",
+				"hints": [
+					"铸币局官员私下表示：“现在没有必要动利率”"
+				],
+				"effects": [{"target": "all", "portions": [0.004], "value": 0.0}]
+			},
+			{
+				"key": "hike", "weight": 25,
+				"headline": "帝国铸币局意外上调金币利率",
+				"body": "铸币局警告“投机过热”，资金成本上升，全市场下跌。",
+				"hints": [
+					"铸币局总裁在议会答询时三次提到“投机过热”",
+					"圣光教会联名上书铸币局，要求“给炒股热降温”"
+				],
+				"effects": [{"target": "all", "portions": [-0.035, -0.02], "value": -0.04}]
+			}
+		]
+	},
+
+	"pool": [
+		{
+			"id": "elder_royal_order", "kind": "company", "weight": 3, "early": true, "precursors": 2,
+			"vague": ["帝国军需处的官员这几天频繁出入魔导工业区", "听说皇家近卫军要换一批新装备"],
+			"variants": [
+				{
+					"key": "win", "weight": 3,
+					"headline": "艾尔德魔导工坊拿下皇家军需大单",
+					"body": "近卫军的新一代魔导铠甲引擎全部交给艾尔德生产，合同金额相当于工坊一年的营收。",
+					"hints": ["军需处的人被看到在艾尔德工坊里待了一整天，出来时满脸笑容", "艾尔德工坊突然开始招聘三百名熟练工"],
+					"effects": [{"target": "elder", "portions": [0.08, 0.05], "value": 0.12}]
+				},
+				{
+					"key": "lose", "weight": 1,
+					"headline": "皇家军需大单旁落，艾尔德落选",
+					"body": "军需处选择了帝国北方的老牌工坊，艾尔德的扩产计划恐怕要搁置。",
+					"hints": ["军需处的人在艾尔德工坊只待了半小时就黑着脸离开了"],
+					"effects": [{"target": "elder", "portions": [-0.06, -0.02], "value": -0.06}]
+				}
+			]
+		},
+		{
+			"id": "elder_breakthrough", "kind": "company", "weight": 3, "precursors": 2,
+			"vague": ["魔导学院的教授们最近常去艾尔德工坊，不知道在折腾什么", "艾尔德工坊的试验场这几天传出奇怪的轰鸣声"],
+			"variants": [
+				{
+					"key": "success", "weight": 3,
+					"headline": "艾尔德发布新型魔晶石引擎，效率提升三成",
+					"body": "同样一块魔晶石能多跑三成路程，各大商社排队询价。",
+					"hints": ["艾尔德的首席工程师在学院讲座上暗示“很快会有好消息”", "有人看到艾尔德的试验魔导车连续跑了三天三夜都没换魔晶石"],
+					"effects": [{"target": "elder", "portions": [0.10, 0.05, 0.03], "value": 0.16}]
+				},
+				{
+					"key": "fail", "weight": 2,
+					"headline": "艾尔德试验炉爆炸，新引擎研发受挫",
+					"body": "所幸无人伤亡，但试验场被炸毁，新产品至少推迟半年。",
+					"hints": ["艾尔德试验场附近的居民抱怨最近总闻到焦糊味", "据说艾尔德的首席工程师和投资人在会议室里吵了起来"],
+					"effects": [{"target": "elder", "portions": [-0.08, -0.03], "value": -0.09}]
+				}
+			]
+		},
+		{
+			"id": "elder_strike", "kind": "company", "weight": 2, "precursors": 1,
+			"vague": ["魔导工业区的工人行会今晚要开大会"],
+			"variants": [
+				{
+					"key": "strike", "weight": 2,
+					"headline": "艾尔德工坊工人罢工，生产线停摆",
+					"body": "工人行会要求涨薪两成，双方僵持不下。",
+					"hints": ["艾尔德的工人们在酒馆里抱怨工资三年没涨了，有人喊出了“罢工”"],
+					"effects": [{"target": "elder", "portions": [-0.06, -0.03], "value": -0.05}]
+				},
+				{
+					"key": "deal", "weight": 1,
+					"headline": "艾尔德与工人行会达成新薪资协议",
+					"body": "工人涨薪一成，生产线照常运转，市场松了一口气。",
+					"hints": ["工人行会的代表说和艾尔德的谈判“气氛不错”"],
+					"effects": [{"target": "elder", "portions": [0.035], "value": 0.02}]
+				}
+			]
+		},
+		{
+			"id": "crystal_price", "kind": "sector", "weight": 2, "precursors": 1,
+			"vague": ["魔晶石交易行的报价牌这几天跳个不停"],
+			"variants": [
+				{
+					"key": "up", "weight": 1,
+					"headline": "魔晶石价格暴涨，魔导工坊成本承压",
+					"body": "北方矿脉产量不及预期，魔晶石一周内涨价两成。",
+					"hints": ["北方矿区来的商人说今年的矿脉“挖着挖着就薄了”"],
+					"effects": [{"target": "elder", "portions": [-0.05, -0.02], "value": -0.05}]
+				},
+				{
+					"key": "down", "weight": 1,
+					"headline": "新矿脉投产，魔晶石价格回落",
+					"body": "东部新矿脉正式开采，魔导工坊的原料成本下降。",
+					"hints": ["东部矿区的第一批魔晶石据说已经装上了龙运货船"],
+					"effects": [{"target": "elder", "portions": [0.05, 0.02], "value": 0.05}]
+				}
+			]
+		},
+		{
+			"id": "monster_tide", "kind": "world", "weight": 3, "months": [3, 4, 5, 9, 10, 11], "precursors": 2,
+			"vague": ["边境哨站的狼烟比往年多了几处", "冒险者公会的布告栏前挤满了人"],
+			"variants": [
+				{
+					"key": "tide", "weight": 3,
+					"headline": "春季魔物潮来袭，冒险者公会发布紧急讨伐令",
+					"body": "讨伐委托暴增，公会联合忙到连见习冒险者都派了出去；飞龙航线被迫绕行，药剂需求大增。",
+					"hints": ["边境村落接连目击成群的魔狼，公会已经发出黄色预警", "晨星药剂的伤药库存据说被公会订走了一大半"],
+					"effects": [
+						{"target": "guild", "portions": [0.09, 0.05], "value": 0.10},
+						{"target": "dragonspine", "portions": [-0.06, -0.02], "value": -0.05},
+						{"target": "morningstar", "portions": [0.04, 0.02], "value": 0.04}
+					]
+				},
+				{
+					"key": "false_alarm", "weight": 1,
+					"headline": "魔物潮虚惊一场，公会撤销讨伐令",
+					"body": "所谓的魔物群只是迁徙的野鹿，冒险者们白跑一趟。",
+					"hints": ["老练的猎人说边境的“魔物”脚印看着更像野鹿"],
+					"effects": [
+						{"target": "guild", "portions": [-0.05], "value": -0.03},
+						{"target": "dragonspine", "portions": [0.035], "value": 0.02}
+					]
+				}
+			]
+		},
+		{
+			"id": "subjugation", "kind": "company", "weight": 3, "early": true, "precursors": 2,
+			"vague": ["冒险者公会正在集结一支大型讨伐队", "下城的铁匠铺这周的订单都是给冒险者打的长枪"],
+			"variants": [
+				{
+					"key": "victory", "weight": 3,
+					"headline": "讨伐队大捷！盘踞西山的岩龙被击退",
+					"body": "公会联合获得帝国嘉奖与巨额赏金，新一批委托接踵而至。",
+					"hints": ["从西山回来的伤员说讨伐队“士气高得吓人”", "公会联合的会长被看到在订庆功宴的场地"],
+					"effects": [{"target": "guild", "portions": [0.09, 0.05], "value": 0.12}]
+				},
+				{
+					"key": "defeat", "weight": 2,
+					"headline": "讨伐失利，公会联合损失惨重",
+					"body": "讨伐队在西山遭遇伏击，赏金泡汤，还要支付大笔抚恤金。",
+					"hints": ["从西山回来的伤员一个比一个多，有人说讨伐队“中了埋伏”", "晨星药剂的急救药剂被公会紧急调走了一批"],
+					"effects": [
+						{"target": "guild", "portions": [-0.09, -0.04], "value": -0.10},
+						{"target": "morningstar", "portions": [0.03], "value": 0.02}
+					]
+				}
+			]
+		},
+		{
+			"id": "dragon_migration", "kind": "world", "weight": 2, "precursors": 2,
+			"vague": ["天象台说今年的风向有些反常", "港区的老船工说天上的龙影比往年来得早"],
+			"variants": [
+				{
+					"key": "early", "weight": 2,
+					"headline": "龙族迁徙季提前，龙运主航线被迫关闭",
+					"body": "野生龙群占据了南方航线，龙脊运输的飞龙只能绕远路，运费收入大减。",
+					"hints": ["龙脊运输的驯龙师说飞龙这几天焦躁不安，不肯往南飞", "南方的龙骑兵哨站报告已经看到第一批野生龙群"],
+					"effects": [{"target": "dragonspine", "portions": [-0.07, -0.03], "value": -0.07}]
+				},
+				{
+					"key": "calm", "weight": 1,
+					"headline": "龙群迁徙路线北移，龙运航线畅通无阻",
+					"body": "今年的龙群绕开了主航线，龙脊运输的运力全部释放。",
+					"hints": ["天象台修正预报：今年龙群大概率走北线"],
+					"effects": [{"target": "dragonspine", "portions": [0.05, 0.02], "value": 0.05}]
+				}
+			]
+		},
+		{
+			"id": "trade_pact", "kind": "company", "weight": 3, "early": true, "precursors": 2,
+			"vague": ["南方海商行会的使团抵达奥鲁姆", "港区码头这几天来了很多生面孔的商人"],
+			"variants": [
+				{
+					"key": "signed", "weight": 3,
+					"headline": "帝国与南方海商行会签订贸易协定",
+					"body": "关税减半、航线互通，龙脊运输将独家承运首批货物。",
+					"hints": ["海商行会的使团团长和龙脊运输的老板在沙龙里相谈甚欢", "龙脊运输突然向驯龙场订购了二十头新飞龙"],
+					"effects": [
+						{"target": "dragonspine", "portions": [0.08, 0.04], "value": 0.10},
+						{"target": "goldwheat", "portions": [0.02], "value": 0.01}
+					]
+				},
+				{
+					"key": "failed", "weight": 1,
+					"headline": "贸易谈判破裂，南方使团提前回国",
+					"body": "双方在关税上分歧太大，龙脊运输的扩张计划泡汤。",
+					"hints": ["有人听到贸易谈判的会议室里传出拍桌子的声音"],
+					"effects": [{"target": "dragonspine", "portions": [-0.06, -0.02], "value": -0.06}]
+				}
+			]
+		},
+		{
+			"id": "weather", "kind": "sector", "weight": 2, "precursors": 1,
+			"vague": ["天象台发布本季气候展望，农户们都在打听"],
+			"variants": [
+				{
+					"key": "rain", "weight": 1,
+					"headline": "春雨充沛，帝国粮仓丰收在望",
+					"body": "金麦商社的麦田长势喜人，收购价稳中有升。",
+					"hints": ["从乡下来的人说今年的麦子“绿得发亮”"],
+					"effects": [{"target": "goldwheat", "portions": [0.05, 0.025], "value": 0.06}]
+				},
+				{
+					"key": "drought", "weight": 1,
+					"headline": "南部持续干旱，粮食减产已成定局",
+					"body": "金麦商社的麦田大面积歉收，今年的利润恐怕要大打折扣。",
+					"hints": ["乡下来的人说南部已经一个多月没下雨了，河床都露了出来"],
+					"effects": [{"target": "goldwheat", "portions": [-0.06, -0.025], "value": -0.06}]
+				}
+			]
+		},
+		{
+			"id": "tariff_bill", "kind": "sector", "weight": 2, "precursors": 2,
+			"vague": ["贵族议会本周将辩论《粮食关税法案》", "议会旁听席一票难求，据说要表决重要法案"],
+			"variants": [
+				{
+					"key": "pass", "weight": 3,
+					"headline": "贵族议会通过《粮食关税法案》",
+					"body": "外国粮食加征三成关税，本国粮商成为最大赢家。",
+					"hints": ["几位中立派贵族在沙龙里公开表示支持粮食关税", "金麦商社的老板被看到给议员们送去了新麦酿的酒"],
+					"effects": [{"target": "goldwheat", "portions": [0.07, 0.03], "value": 0.08}]
+				},
+				{
+					"key": "veto", "weight": 2,
+					"headline": "《粮食关税法案》在议会被否决",
+					"body": "平民派与商人派联手否决了法案，粮价预期回落。",
+					"hints": ["平民派领袖在广场演讲，号召议员“不要让面包涨价”"],
+					"effects": [{"target": "goldwheat", "portions": [-0.045, -0.015], "value": -0.04}]
+				}
+			]
+		},
+		{
+			"id": "epidemic", "kind": "world", "weight": 2, "precursors": 2,
+			"vague": ["下城的诊所门口这几天排起了长队", "圣光教会开始在街头分发护身符"],
+			"variants": [
+				{
+					"key": "spread", "weight": 2,
+					"headline": "春季流感在下城蔓延，药剂供不应求",
+					"body": "晨星药剂的退热药剂被抢购一空，工坊连夜加班。",
+					"hints": ["药剂学徒说最近配退热药剂配到手软", "晨星药剂贴出告示：退热药剂每人限购两瓶"],
+					"effects": [
+						{"target": "morningstar", "portions": [0.07, 0.04], "value": 0.08},
+						{"target": "guild", "portions": [-0.02], "value": 0.0}
+					]
+				},
+				{
+					"key": "contained", "weight": 1,
+					"headline": "流感疫情迅速得到控制",
+					"body": "教会与诊所联手隔离病患，药剂抢购潮退去。",
+					"hints": ["诊所门口的长队这两天短了很多"],
+					"effects": [{"target": "morningstar", "portions": [-0.035], "value": -0.02}]
+				}
+			]
+		},
+		{
+			"id": "morningstar_contract", "kind": "company", "weight": 2, "early": true, "precursors": 2,
+			"vague": ["帝国军医处正在招标新一年的药剂供应商"],
+			"variants": [
+				{
+					"key": "won", "weight": 3,
+					"headline": "晨星药剂中标帝国军药剂供应合同",
+					"body": "未来三年的军用伤药由晨星独家供应，订单稳定又丰厚。",
+					"hints": ["军医处的官员夸晨星的伤药“见效快、不留疤”", "晨星药剂正在扩建第二座炼金工坊"],
+					"effects": [{"target": "morningstar", "portions": [0.06, 0.03], "value": 0.08}]
+				},
+				{
+					"key": "lost", "weight": 1,
+					"headline": "晨星药剂落标，军药合同花落别家",
+					"body": "军医处选择了报价更低的外国药剂商。",
+					"hints": ["据说外国药剂商的报价比晨星低了三成"],
+					"effects": [{"target": "morningstar", "portions": [-0.045, -0.015], "value": -0.04}]
+				}
+			]
+		},
+		{
+			"id": "guild_scandal", "kind": "company", "weight": 1, "precursors": 2,
+			"vague": ["金融监察厅的人这几天出现在冒险者公会附近"],
+			"variants": [
+				{
+					"key": "scandal", "weight": 1,
+					"headline": "公会联合爆出账目丑闻，赏金去向成谜",
+					"body": "监察厅查出公会联合虚报讨伐赏金，会长被约谈。",
+					"hints": ["公会联合的出纳突然辞职，据说是“家里有事”", "有冒险者抱怨上个月的赏金到现在还没发"],
+					"effects": [{"target": "guild", "portions": [-0.10, -0.04], "value": -0.10}]
+				}
+			]
+		}
+	],
+
+	"rumors": [
+		{
+			"id": "hero_return", "weight": 2, "delay": [2, 4], "truth": 0.5,
+			"stage": {"pre_open": 2, "intraday": 1},
+			"rumor": {
+				"headline": "街谈巷议：传说中的勇者要回奥鲁姆了？",
+				"body": "有人在北门看到一个背着圣剑的身影，冒险者们议论纷纷。",
+				"effects": [{"target": "guild", "portions": [0.04], "value": 0.0}]
+			},
+			"true": {
+				"headline": "勇者确认归来！冒险者公会委托暴增",
+				"body": "勇者在公会大厅公开露面，各地委托蜂拥而至。",
+				"effects": [{"target": "guild", "portions": [0.10, 0.05], "value": 0.12}]
+			},
+			"false": {
+				"headline": "“勇者归来”纯属误传，只是个 cosplay 的吟游诗人",
+				"body": "追捧公会联合的散户们大失所望。",
+				"effects": [{"target": "guild", "portions": [-0.06], "value": 0.0}]
+			}
+		},
+		{
+			"id": "morningstar_drug", "weight": 2, "delay": [2, 4], "truth": 0.5,
+			"stage": {"pre_open": 2, "intraday": 1},
+			"rumor": {
+				"headline": "街谈巷议：晨星药剂的“万能解毒剂”就要获批？",
+				"body": "药剂学院的学生说审查委员会对它评价很高。",
+				"effects": [{"target": "morningstar", "portions": [0.03], "value": 0.0}]
+			},
+			"true": {
+				"headline": "晨星药剂“万能解毒剂”正式获批上市",
+				"body": "帝国药剂审查委员会全票通过，冒险者们争相预订。",
+				"effects": [{"target": "morningstar", "portions": [0.08, 0.04], "value": 0.10}]
+			},
+			"false": {
+				"headline": "审查委员会辟谣：晨星解毒剂仍需三年试验",
+				"body": "所谓“即将获批”只是学生们的猜测。",
+				"effects": [{"target": "morningstar", "portions": [-0.045], "value": 0.0}]
+			}
+		},
+		{
+			"id": "elder_merger", "weight": 1, "delay": [2, 4], "truth": 0.4,
+			"stage": {"pre_open": 2, "intraday": 1},
+			"rumor": {
+				"headline": "街谈巷议：帝国某大商社有意收购艾尔德工坊？",
+				"body": "有人看到格兰兹家族的马车停在艾尔德工坊门口。",
+				"effects": [{"target": "elder", "portions": [0.04], "value": 0.0}]
+			},
+			"true": {
+				"headline": "格兰兹商社宣布溢价收购艾尔德工坊两成股份",
+				"body": "收购价比市价高出一截，艾尔德的股东们乐开了花。",
+				"effects": [{"target": "elder", "portions": [0.10, 0.04], "value": 0.12}]
+			},
+			"false": {
+				"headline": "格兰兹家族否认收购传闻：“只是去修马车”",
+				"body": "艾尔德的追涨资金纷纷撤离。",
+				"effects": [{"target": "elder", "portions": [-0.06], "value": 0.0}]
+			}
+		},
+		{
+			"id": "dragonspine_accident", "weight": 1, "delay": [1, 3], "truth": 0.5,
+			"stage": {"pre_open": 1, "intraday": 1},
+			"rumor": {
+				"headline": "街谈巷议：龙脊运输的一头货运飞龙在海上失踪？",
+				"body": "港区的水手们说昨晚没看到它按时返航。",
+				"effects": [{"target": "dragonspine", "portions": [-0.04], "value": 0.0}]
+			},
+			"true": {
+				"headline": "龙脊运输证实：一头货运飞龙在风暴中失事",
+				"body": "飞龙和货物都没能找回，保险理赔还要打官司。",
+				"effects": [{"target": "dragonspine", "portions": [-0.06, -0.02], "value": -0.06}]
+			},
+			"false": {
+				"headline": "失踪的飞龙平安返航，只是在岛上躲了一晚风暴",
+				"body": "龙脊运输股价收复失地。",
+				"effects": [{"target": "dragonspine", "portions": [0.05], "value": 0.0}]
+			}
+		}
+	],
+
+	"filler": [
+		{"title": "皇家歌剧院新剧《魔晶石之恋》场场爆满", "body": "黄牛票已经炒到原价的五倍。"},
+		{"title": "金穗大道新开了一家魔导咖啡馆", "body": "据说咖啡是用魔导炉烘焙的，香气飘了半条街。"},
+		{"title": "地行龙竞技场本周举办春季大赛", "body": "卫冕冠军“铁蹄”赔率一赔一点二。"},
+		{"title": "帝国魔导学院招生考试报名人数创新高", "body": "考官表示今年的魔力测试仪已经烧坏了三台。"},
+		{"title": "下城酒馆“醉龙亭”推出炒股主题套餐", "body": "点“涨停烤肉”送“抄底麦酒”一杯。"},
+		{"title": "皇家交易所新增两台魔导报价牌", "body": "报价更新速度提升一倍，散户们再也不用挤在柜台前喊价。"},
+		{"title": "奥鲁姆市政厅：本月起金穗大道夜间禁止飞龙低空飞行", "body": "居民投诉龙吼声太吵。"},
+		{"title": "圣光教会发表布道：“投机如饮海水，越饮越渴”", "body": "布道结束后，有信徒在门口打听哪支股票能涨。"},
+		{"title": "《金穗日报》读者来信：我的猫好像比我会炒股", "body": "它踩到哪支股票的报纸，那支股票就涨。"},
+		{"title": "港区海鲜市场迎来春季第一批魔鳗", "body": "每条都能发出微弱的光，据说吃了眼睛会变亮。"},
+		{"title": "帝国铁路局：魔导列车将在夏季延伸到东部矿区", "body": "沿线地价已经开始上涨。"},
+		{"title": "奥鲁姆春季花市开幕，月光蔷薇供不应求", "body": "一位贵族小姐一口气买下了整个摊位。"},
+		{"title": "专栏：新手炒股的三个忠告", "body": "一、别借钱；二、别听酒馆传闻；三、别相信专栏。"},
+		{"title": "见习冒险者培训班报名火爆", "body": "教官提醒：魔物不会因为你买了公会股票就手下留情。"},
+		{"title": "皇家图书馆展出三百年前的“郁金香泡沫”手稿", "body": "馆长说：“历史不会重复，但会押韵。”"},
+		{"title": "贵族区沙龙流行新话题：你的看板娘是哪位？", "body": "据统计，艾尔和莉莉的人气不相上下。"},
+		{"title": "天象台：本周晴朗，适合晾晒魔晶石", "body": "周末可能有阵雨，出门记得带伞。"},
+		{"title": "帝国邮政推出“飞龙快递”，次日送达全国", "body": "首单免费，龙脊运输负责承运。"}
+	]
+}

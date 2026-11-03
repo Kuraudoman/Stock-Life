@@ -1,0 +1,454 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/ui/heroine_portrait.gd" id="2_heroine"]
+[ext_resource type="Script" path="res://scripts/ui/stock_board.gd" id="3_board"]
+[ext_resource type="Script" path="res://scripts/ui/candle_chart.gd" id="4_chart"]
+[ext_resource type="Script" path="res://scripts/ui/mascot_view.gd" id="5_mascot"]
+[ext_resource type="Texture2D" path="res://assets/ui/kenney/bg_grid.png" id="6_grid"]
+[ext_resource type="Script" path="res://scripts/ui/fx_layer.gd" id="7_fx"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main")
+
+[node name="Bg" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("6_grid")
+stretch_mode = 1
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Root" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TopBar" type="PanelContainer" parent="Margin/Root"]
+layout_mode = 2
+
+[node name="TopRow" type="HBoxContainer" parent="Margin/Root/TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="DateLabel" type="Label" parent="Margin/Root/TopBar/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.659, 0.345, 0.122, 1)
+text = "4月1日 周一"
+
+[node name="TimeLabel" type="Label" parent="Margin/Root/TopBar/TopRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(56, 0)
+layout_mode = 2
+text = "09:00"
+
+[node name="CashLabel" type="Label" parent="Margin/Root/TopBar/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "现金 10,000"
+
+[node name="NetLabel" type="Label" parent="Margin/Root/TopBar/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "净资产 -40,000"
+
+[node name="DebtLabel" type="Label" parent="Margin/Root/TopBar/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "负债 50,000"
+
+[node name="HpLabel" type="Label" parent="Margin/Root/TopBar/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "体力 100"
+
+[node name="StressLabel" type="Label" parent="Margin/Root/TopBar/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "压力 20"
+
+[node name="HeatLabel" type="Label" parent="Margin/Root/TopBar/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "调查度 0"
+
+[node name="DeadlineLabel" type="Label" parent="Margin/Root/TopBar/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.722, 0.416, 0.047, 1)
+text = "期限 4/30 · 剩 21 天"
+
+[node name="Spacer" type="Control" parent="Margin/Root/TopBar/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="RepayButton" type="Button" parent="Margin/Root/TopBar/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "把现金还给黑鸦商会。还清即通关第一章"
+focus_mode = 0
+text = "还款"
+
+[node name="SaveButton" type="Button" parent="Margin/Root/TopBar/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "保存到 saves/slot1.stocklife.json（每天收盘也会自动存档）"
+focus_mode = 0
+text = "存档"
+
+[node name="TitleButton" type="Button" parent="Margin/Root/TopBar/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+text = "标题"
+
+[node name="Body" type="HBoxContainer" parent="Margin/Root"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="LeftCol" type="VBoxContainer" parent="Margin/Root/Body"]
+custom_minimum_size = Vector2(290, 0)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HeroinePanel" type="PanelContainer" parent="Margin/Root/Body/LeftCol"]
+custom_minimum_size = Vector2(0, 230)
+layout_mode = 2
+theme_type_variation = &"FeaturePanel"
+
+[node name="HeroinePortrait" type="Control" parent="Margin/Root/Body/LeftCol/HeroinePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+script = ExtResource("2_heroine")
+
+[node name="BoardPanel" type="PanelContainer" parent="Margin/Root/Body/LeftCol"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BoardBox" type="VBoxContainer" parent="Margin/Root/Body/LeftCol/BoardPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="BoardTitle" type="Label" parent="Margin/Root/Body/LeftCol/BoardPanel/BoardBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"RibbonLabel"
+text = "股票列表"
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/Root/Body/LeftCol/BoardPanel/BoardBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="StockBoard" type="VBoxContainer" parent="Margin/Root/Body/LeftCol/BoardPanel/BoardBox/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+script = ExtResource("3_board")
+
+[node name="CenterCol" type="VBoxContainer" parent="Margin/Root/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="ChartPanel" type="PanelContainer" parent="Margin/Root/Body/CenterCol"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ChartBox" type="VBoxContainer" parent="Margin/Root/Body/CenterCol/ChartPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ChartHeader" type="HBoxContainer" parent="Margin/Root/Body/CenterCol/ChartPanel/ChartBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ChartTitle" type="Label" parent="Margin/Root/Body/CenterCol/ChartPanel/ChartBox/ChartHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 17
+text = "艾尔德魔导工坊"
+
+[node name="DailyButton" type="Button" parent="Margin/Root/Body/CenterCol/ChartPanel/ChartBox/ChartHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+text = "日 K"
+
+[node name="IntradayButton" type="Button" parent="Margin/Root/Body/CenterCol/ChartPanel/ChartBox/ChartHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+text = "分时"
+
+[node name="CandleChart" type="Control" parent="Margin/Root/Body/CenterCol/ChartPanel/ChartBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("4_chart")
+
+[node name="TradePanel" type="PanelContainer" parent="Margin/Root/Body/CenterCol"]
+layout_mode = 2
+
+[node name="TradeBox" type="VBoxContainer" parent="Margin/Root/Body/CenterCol/TradePanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TradeHeader" type="HBoxContainer" parent="Margin/Root/Body/CenterCol/TradePanel/TradeBox"]
+layout_mode = 2
+
+[node name="TradeTitle" type="Label" parent="Margin/Root/Body/CenterCol/TradePanel/TradeBox/TradeHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.659, 0.345, 0.122, 1)
+text = "交易"
+
+[node name="HoldingLabel" type="Label" parent="Margin/Root/Body/CenterCol/TradePanel/TradeBox/TradeHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "未持有"
+
+[node name="TradeRow" type="HBoxContainer" parent="Margin/Root/Body/CenterCol/TradePanel/TradeBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="QtyLabel" type="Label" parent="Margin/Root/Body/CenterCol/TradePanel/TradeBox/TradeRow"]
+layout_mode = 2
+text = "数量"
+
+[node name="QtySpin" type="SpinBox" parent="Margin/Root/Body/CenterCol/TradePanel/TradeBox/TradeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+min_value = 10.0
+max_value = 10000000.0
+step = 10.0
+value = 100.0
+suffix = "股"
+
+[node name="MaxBuyButton" type="Button" parent="Margin/Root/Body/CenterCol/TradePanel/TradeBox/TradeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+text = "最大可买"
+
+[node name="AllButton" type="Button" parent="Margin/Root/Body/CenterCol/TradePanel/TradeBox/TradeRow"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+text = "全部持仓"
+
+[node name="Spacer" type="Control" parent="Margin/Root/Body/CenterCol/TradePanel/TradeBox/TradeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="BuyButton" type="Button" parent="Margin/Root/Body/CenterCol/TradePanel/TradeBox/TradeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 2
+theme_type_variation = &"BuyButton"
+focus_mode = 0
+text = "买入"
+
+[node name="SellButton" type="Button" parent="Margin/Root/Body/CenterCol/TradePanel/TradeBox/TradeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 2
+theme_type_variation = &"SellButton"
+focus_mode = 0
+text = "卖出"
+
+[node name="PreviewLabel" type="Label" parent="Margin/Root/Body/CenterCol/TradePanel/TradeBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "开盘后才能下单"
+clip_text = true
+
+[node name="RightCol" type="VBoxContainer" parent="Margin/Root/Body"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="MascotPanel" type="PanelContainer" parent="Margin/Root/Body/RightCol"]
+custom_minimum_size = Vector2(0, 230)
+layout_mode = 2
+
+[node name="MascotView" type="Control" parent="Margin/Root/Body/RightCol/MascotPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+script = ExtResource("5_mascot")
+
+[node name="NewsPanel" type="PanelContainer" parent="Margin/Root/Body/RightCol"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="NewsBox" type="VBoxContainer" parent="Margin/Root/Body/RightCol/NewsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="NewsHeader" type="HBoxContainer" parent="Margin/Root/Body/RightCol/NewsPanel/NewsBox"]
+layout_mode = 2
+
+[node name="NewsTitle" type="Label" parent="Margin/Root/Body/RightCol/NewsPanel/NewsBox/NewsHeader"]
+layout_mode = 2
+size_flags_horizontal = 6
+theme_type_variation = &"RibbonLabel"
+text = "新闻与消息"
+
+[node name="PaperButton" type="Button" parent="Margin/Root/Body/RightCol/NewsPanel/NewsBox/NewsHeader"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "重看今天的晨报"
+focus_mode = 0
+theme_override_font_sizes/font_size = 13
+text = "晨报"
+
+[node name="NewsLog" type="RichTextLabel" parent="Margin/Root/Body/RightCol/NewsPanel/NewsBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_font_sizes/normal_font_size = 13
+bbcode_enabled = true
+scroll_following = true
+selection_enabled = true
+
+[node name="BottomBar" type="PanelContainer" parent="Margin/Root"]
+layout_mode = 2
+
+[node name="BottomRow" type="HBoxContainer" parent="Margin/Root/BottomBar"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="SpeedLabel" type="Label" parent="Margin/Root/BottomBar/BottomRow"]
+layout_mode = 2
+text = "速度"
+
+[node name="PauseButton" type="Button" parent="Margin/Root/BottomBar/BottomRow"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "暂停（空格）"
+focus_mode = 0
+text = "暂停"
+
+[node name="Speed1Button" type="Button" parent="Margin/Root/BottomBar/BottomRow"]
+unique_name_in_owner = true
+layout_mode = 2
+tooltip_text = "1 秒 1 个 tick（10 分钟）"
+focus_mode = 0
+text = "1x"
+
+[node name="Speed2Button" type="Button" parent="Margin/Root/BottomBar/BottomRow"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+text = "2x"
+
+[node name="Speed4Button" type="Button" parent="Margin/Root/BottomBar/BottomRow"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+text = "4x"
+
+[node name="Spacer" type="Control" parent="Margin/Root/BottomBar/BottomRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="PhaseLabel" type="Label" parent="Margin/Root/BottomBar/BottomRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "开盘前"
+
+[node name="FinishButton" type="Button" parent="Margin/Root/BottomBar/BottomRow"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+tooltip_text = "立即推进到 15:00 收盘"
+focus_mode = 0
+text = "快进到收盘 ⏭"
+
+[node name="ActionButton" type="Button" parent="Margin/Root/BottomBar/BottomRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+focus_mode = 0
+text = "开盘 ▶"
+
+[node name="QuitDialog" type="ConfirmationDialog" parent="."]
+unique_name_in_owner = true
+title = "返回标题"
+initial_position = 2
+size = Vector2i(380, 140)
+ok_button_text = "返回标题"
+cancel_button_text = "继续游戏"
+dialog_text = "返回标题画面？上次存档之后的进度会丢失。"
+
+[node name="Fx" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("7_fx")
+shake_target = NodePath("../Margin")
+
+[node name="Toast" type="Label" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -300.0
+offset_top = 64.0
+offset_right = 300.0
+offset_bottom = 100.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.97, 0.9, 1)
+theme_override_font_sizes/font_size = 17
+text = "【快讯】"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Overlay" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

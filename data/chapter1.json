@@ -1,0 +1,12 @@
+{
+	"_comment": "第一章 · 黎明（GDD 第 8 节）。deadline_day 为期限（日序号，第 1 天 = 4 月 1 日）；期限那天收盘还没还清债务时，按收盘价卖出全部持仓抵债，仍不够即失败。start_cash / debt 为平衡参数，见 README 的平衡说明。",
+	"id": "chapter1",
+	"title": "第一章 · 黎明",
+	"phase": "dawn",
+	"start_cash": 40000,
+	"debt": 50000,
+	"deadline_day": 30,
+	"affection": {"noelle": 10, "mia": 0},
+	"review_affection": 3,
+	"tutorial_affection": 2
+}

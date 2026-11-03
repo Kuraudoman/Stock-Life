@@ -1,0 +1,178 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/title.gd" id="1_title"]
+[ext_resource type="Texture2D" path="res://assets/ui/kenney/bg_grid.png" id="2_grid"]
+
+[node name="Title" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_title")
+
+[node name="Bg" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_grid")
+stretch_mode = 1
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(560, 0)
+layout_mode = 2
+theme_type_variation = &"FeaturePanel"
+
+[node name="VBox" type="VBoxContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="GameTitle" type="Label" parent="Center/Panel/VBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"RibbonTitle"
+text = "Stock-Life"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.549, 0.451, 0.341, 1)
+text = "赫尔墨斯帝国 · 奥鲁姆皇家交易所"
+horizontal_alignment = 1
+
+[node name="HSep" type="HSeparator" parent="Center/Panel/VBox"]
+layout_mode = 2
+
+[node name="NameRow" type="HBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="NameLabel" type="Label" parent="Center/Panel/VBox/NameRow"]
+layout_mode = 2
+text = "主角名字"
+
+[node name="NameEdit" type="LineEdit" parent="Center/Panel/VBox/NameRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "希雅"
+max_length = 8
+
+[node name="TutorialButton" type="Button" parent="Center/Panel/VBox/NameRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+tooltip_text = "关闭后不再播放诺艾尔的教学对话（开场剧情和结局对话照常播放）"
+focus_mode = 0
+toggle_mode = true
+button_pressed = true
+text = "诺艾尔教学：开"
+
+[node name="SeedRow" type="HBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SeedLabel" type="Label" parent="Center/Panel/VBox/SeedRow"]
+layout_mode = 2
+text = "随机种子"
+
+[node name="SeedEdit" type="LineEdit" parent="Center/Panel/VBox/SeedRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "留空则随机；同一种子 = 同一局行情"
+
+[node name="NewGameButton" type="Button" parent="Center/Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "新游戏"
+
+[node name="ContinueButton" type="Button" parent="Center/Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "继续（最近的存档）"
+
+[node name="SlotsLabel" type="Label" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.549, 0.451, 0.341, 1)
+theme_override_font_sizes/font_size = 13
+text = "存档（saves 文件夹，一个存档一个文件，复制即可迁移）"
+
+[node name="SlotList" type="ItemList" parent="Center/Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 130)
+layout_mode = 2
+
+[node name="SlotButtons" type="HBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LoadButton" type="Button" parent="Center/Panel/VBox/SlotButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "读取选中存档"
+
+[node name="RefreshButton" type="Button" parent="Center/Panel/VBox/SlotButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "刷新"
+
+[node name="OpenFolderButton" type="Button" parent="Center/Panel/VBox/SlotButtons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "打开存档文件夹"
+
+[node name="SaveDirLabel" type="Label" parent="Center/Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(540, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.549, 0.451, 0.341, 1)
+theme_override_font_sizes/font_size = 11
+autowrap_mode = 3
+
+[node name="StatusLabel" type="Label" parent="Center/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.722, 0.416, 0.047, 1)
+autowrap_mode = 3
+
+[node name="QuitButton" type="Button" parent="Center/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "退出"
+
+[node name="VersionLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -28.0
+offset_right = -12.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.549, 0.451, 0.341, 1)
+theme_override_font_sizes/font_size = 12
+text = "v0.2.0 · M1 MVP"
+horizontal_alignment = 2

@@ -1,0 +1,16 @@
+# Godot 编辑器缓存
+.godot/
+/android/
+
+# 导出产物
+build/
+*.tmp
+
+# 存档：只保留 saves/.gitkeep
+saves/*
+!saves/.gitkeep
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,100 @@
+{
+	"_comment": "诺艾尔的教学与第一章剧情对话。who: heroine / noelle / raven；expr 为表情；{name} 主角名，{debt} 债务，{cash} 现金，{deadline} 期限日期。choices 为对话最后的选项，affection 为好感变化，reply 为选择后的回应。",
+	"intro": {
+		"lines": [
+			{"who": "raven", "expr": "smug", "text": "初次见面，{name}小姐。你叔叔留下的交易席位很漂亮——可惜，还有他欠我们黑鸦商会的 {debt} 金币。"},
+			{"who": "heroine", "expr": "panic", "text": "五、五万？！叔叔的信里可没写这个……"},
+			{"who": "raven", "expr": "smug", "text": "给你 30 天，到{deadline}收盘为止。还清，席位归你；还不清……席位就归我了。祝你好运，小交易员。"},
+			{"who": "noelle", "expr": "normal", "text": "……她走了。我是诺艾尔，你叔叔的会计，从今天起是你的秘书。叫我诺艾尔就行，老板。"},
+			{"who": "noelle", "expr": "normal", "text": "账上有 {cash} 金币现金。要在 30 天里凑够 {debt}，光靠运气是不够的。"},
+			{"who": "noelle", "expr": "smile", "text": "好消息是，奥鲁姆的股价不是随便乱跳的。大行情之前，报纸、传闻、成交量里总会先露出马脚。读懂它们，就是你的工作。"},
+			{"who": "noelle", "expr": "normal", "text": "顶栏的「还款」随时可以把现金还给黑鸦商会。还清那一刻，第一章就结束了。期限那天收盘还没还清的话，我会把持仓按收盘价卖掉替你还债——不够，就只能认输。"}
+		],
+		"choices": [
+			{"text": "我会还清的！", "affection": {"noelle": 2}, "reply": {"who": "noelle", "expr": "smile", "text": "……嗯，这才像样。先从看报纸开始吧。"}},
+			{"text": "能不能……不还？", "affection": {}, "reply": {"who": "noelle", "expr": "annoyed", "text": "可以啊。然后席位归渡鸦夫人，你回乡下种麦子。……报纸来了，看吧。"}}
+		]
+	},
+	"paper": {
+		"lines": [
+			{"who": "noelle", "expr": "normal", "text": "这是每天开盘前送来的《金穗日报》。分几栏，作用不一样。"},
+			{"who": "noelle", "expr": "normal", "text": "「要闻」是已经发生的事。消息出来的时候，大家都看到了，开盘价会直接跳上去或跳下来——想靠它赚钱，得比报纸更早。"},
+			{"who": "noelle", "expr": "smile", "text": "所以要盯「市场」这一栏：哪家公司的高管满面春风、哪里的仓库灯火通明……这些是前兆。真正的消息通常在 1 到 5 个交易日之后才出来，但报纸不会告诉你是哪一天。"},
+			{"who": "noelle", "expr": "normal", "text": "「街谈巷议」是传闻，真假参半。假的传闻过几天就会被辟谣，追进去的人会被套住。"},
+			{"who": "noelle", "expr": "normal", "text": "看完了就按右下角的「开盘」。报纸随时可以从右边的消息栏回看。"}
+		]
+	},
+	"open": {
+		"lines": [
+			{"who": "noelle", "expr": "normal", "text": "开盘了。9:00 到 15:00，每 10 分钟走一格。底部可以切换暂停和速度，空格键也能暂停。"},
+			{"who": "noelle", "expr": "normal", "text": "左边点股票切换，中间看 K 线和分时，下面输入数量买卖。最少 10 股，手续费 0.3%，卖出再收 0.1% 的税。红色是涨，绿色是跌。"},
+			{"who": "noelle", "expr": "smile", "text": "K 线上的小三角，标的是以前发生过消息的日子。回头看看前兆出现在哪天、消息在哪天，你会找到感觉的。"}
+		]
+	},
+	"breaking": {
+		"lines": [
+			{"who": "noelle", "expr": "surprised", "text": "快讯！盘中突然出的消息，股价会在接下来几十分钟里急涨或急跌。"},
+			{"who": "noelle", "expr": "normal", "text": "我先帮你按了暂停。要追还是要跑，自己决定——不过最好的位置，永远是在快讯之前就已经买好了。"}
+		]
+	},
+	"precursor_hit": {
+		"lines": [
+			{"who": "noelle", "expr": "smile", "text": "看到了吗，老板？前几天报纸「市场」栏里的那条风声，今天应验了。"},
+			{"who": "noelle", "expr": "normal", "text": "这就是这里的规矩：大行情之前总有前兆。下次看到类似的风声，就该提前想好怎么办了。"}
+		]
+	},
+	"predict": {
+		"lines": [
+			{"who": "heroine", "expr": "smile", "text": "诺艾尔，我有时候看着报价牌，会突然觉得“这支要涨了”……"},
+			{"who": "noelle", "expr": "normal", "text": "你叔叔也有这种直觉。准的时候很准，不准的时候……他就是这么欠下五万金币的。"},
+			{"who": "noelle", "expr": "normal", "text": "你的预感准不准，取决于你当时的状态。心平气和、身体健康的时候最可靠；上头、恐慌、累了、病了，就会越来越离谱——甚至完全说反。"},
+			{"who": "noelle", "expr": "smile", "text": "我没法告诉你准确率是多少。看看你自己的脸色和状态标签，再决定信不信吧。每天最多 3 次，每次都会消耗体力。"}
+		]
+	},
+	"summary": {
+		"lines": [
+			{"who": "noelle", "expr": "normal", "text": "收盘了。每天收盘我都会对一次账，游戏也会自动存档。"},
+			{"who": "noelle", "expr": "normal", "text": "晚上有两个选择：早点休息，恢复体力、降低压力；或者跟我复盘，我会把明天值得盯的风声告诉你。"},
+			{"who": "noelle", "expr": "smile", "text": "我们越熟，我的判断就越准——当然，前提是你愿意听我唠叨。"}
+		]
+	},
+	"weekend": {
+		"lines": [
+			{"who": "noelle", "expr": "normal", "text": "周末休市，可以喘口气了。休息日体力恢复得多。"},
+			{"who": "noelle", "expr": "normal", "text": "但新闻可不休息。周末发生的事，会在周一开盘时一口气跳出来——这就是所谓的“周一开盘惊吓”。"}
+		]
+	},
+	"state": {
+		"lines": [
+			{"who": "noelle", "expr": "worried", "text": "老板，你的状态变了。左上角的标签和你的脸色，就是你此刻的样子。"},
+			{"who": "noelle", "expr": "normal", "text": "乐观的时候会把横盘看成上涨，悲观的时候正相反；狂热和恐慌会让你几乎只说“大涨”或“大跌”。累了、感冒了，判断也会打折。"},
+			{"who": "noelle", "expr": "smile", "text": "反过来说，如果你确定她——咳，你自己——现在在说胡话，反着听也是一种办法。"}
+		]
+	},
+	"deadline": {
+		"lines": [
+			{"who": "noelle", "expr": "worried", "text": "只剩最后 5 个交易日了，老板。"},
+			{"who": "noelle", "expr": "normal", "text": "期限那天收盘，渡鸦夫人会派人来收账。现金不够的话，我会把持仓按收盘价全部卖掉。所以最后几天，别把赚到的再亏回去。"}
+		]
+	},
+	"hospital": {
+		"lines": [
+			{"who": "noelle", "expr": "worried", "text": "……你终于醒了。体力透支，医生说要住院三个交易日。"},
+			{"who": "noelle", "expr": "annoyed", "text": "这几天市场照常开，但你一股都不准碰。持仓我替你看着。下次别把自己逼成这样。"}
+		]
+	},
+	"cleared": {
+		"lines": [
+			{"who": "raven", "expr": "smug", "text": "……{debt} 金币，一枚不少。看来我小看你了，{name}小姐。"},
+			{"who": "raven", "expr": "smile", "text": "席位是你的了。不过，奥鲁姆的繁荣才刚刚开始——以后要借钱，随时来找我。"},
+			{"who": "noelle", "expr": "smile", "text": "……老板。干得好。今晚我请客——只此一次。"}
+		]
+	},
+	"failed": {
+		"lines": [
+			{"who": "raven", "expr": "smug", "text": "时间到了，{name}小姐。还差的部分……就用席位来抵吧。"},
+			{"who": "heroine", "expr": "cry", "text": "对不起，叔叔……对不起，诺艾尔……"},
+			{"who": "noelle", "expr": "worried", "text": "……不是你的错，老板。至少不全是。读档重来吧，这次我会更早提醒你的。"}
+		]
+	}
+}

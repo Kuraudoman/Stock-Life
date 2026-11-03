@@ -1,0 +1,157 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/predict_popup.gd" id="1_predict"]
+[ext_resource type="Script" path="res://scripts/ui/portrait_view.gd" id="2_portrait"]
+
+[node name="PredictPopup" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_predict")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.2, 0.14, 0.08, 0.35)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(700, 0)
+layout_mode = 2
+theme_type_variation = &"FeaturePanel"
+
+[node name="HBox" type="HBoxContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Portrait" type="Control" parent="Center/Panel/HBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 290)
+layout_mode = 2
+size_flags_vertical = 0
+script = ExtResource("2_portrait")
+follow_state = true
+
+[node name="VBox" type="VBoxContainer" parent="Center/Panel/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Center/Panel/HBox/VBox"]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_type_variation = &"RibbonLabel"
+text = "走势预测"
+
+[node name="StateLabel" type="Label" parent="Center/Panel/HBox/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(440, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "平静 · 健康：头脑清醒，判断最可靠。"
+autowrap_mode = 3
+
+[node name="StockLabel" type="Label" parent="Center/Panel/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.549, 0.451, 0.341, 1)
+theme_override_font_sizes/font_size = 13
+text = "预测哪一支？"
+
+[node name="Stocks" type="HBoxContainer" parent="Center/Panel/HBox/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HorizonLabel" type="Label" parent="Center/Panel/HBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.549, 0.451, 0.341, 1)
+theme_override_font_sizes/font_size = 13
+text = "看多远？"
+
+[node name="Horizons" type="HBoxContainer" parent="Center/Panel/HBox/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Bubble" type="PanelContainer" parent="Center/Panel/HBox/VBox"]
+custom_minimum_size = Vector2(0, 74)
+layout_mode = 2
+
+[node name="LineLabel" type="Label" parent="Center/Panel/HBox/VBox/Bubble"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "……"
+autowrap_mode = 3
+
+[node name="ResultLabel" type="Label" parent="Center/Panel/HBox/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = " "
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="Center/Panel/HBox/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="Buttons" type="HBoxContainer" parent="Center/Panel/HBox/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 2
+
+[node name="CostLabel" type="Label" parent="Center/Panel/HBox/VBox/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.549, 0.451, 0.341, 1)
+theme_override_font_sizes/font_size = 12
+text = "今日还能预测 3 次 · 每次消耗体力 5"
+
+[node name="CancelButton" type="Button" parent="Center/Panel/HBox/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 36)
+layout_mode = 2
+focus_mode = 0
+text = "算了"
+
+[node name="PredictButton" type="Button" parent="Center/Panel/HBox/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 36)
+layout_mode = 2
+focus_mode = 0
+text = "说说看 ▶"
+
+[node name="IgnoreButton" type="Button" parent="Center/Panel/HBox/VBox/Buttons"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(80, 36)
+layout_mode = 2
+tooltip_text = "听听就好，不当真"
+focus_mode = 0
+text = "忽略"
+
+[node name="AdoptButton" type="Button" parent="Center/Panel/HBox/VBox/Buttons"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(170, 36)
+layout_mode = 2
+tooltip_text = "记下来，并切换到这支股票"
+focus_mode = 0
+text = "采纳，切到这支 ▶"

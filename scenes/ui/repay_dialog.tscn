@@ -1,0 +1,102 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/repay_dialog.gd" id="1_repay"]
+
+[node name="RepayDialog" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_repay")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.2, 0.14, 0.08, 0.35)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(460, 0)
+layout_mode = 2
+theme_type_variation = &"FeaturePanel"
+
+[node name="VBox" type="VBoxContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Center/Panel/VBox"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_type_variation = &"RibbonLabel"
+text = "向黑鸦商会还款"
+
+[node name="InfoLabel" type="Label" parent="Center/Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+text = "现金 0　剩余债务 0"
+autowrap_mode = 3
+
+[node name="Row" type="HBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AmountLabel" type="Label" parent="Center/Panel/VBox/Row"]
+layout_mode = 2
+text = "金额"
+
+[node name="AmountSpin" type="SpinBox" parent="Center/Panel/VBox/Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+step = 0.01
+custom_arrow_step = 1000.0
+suffix = "金币"
+
+[node name="AllButton" type="Button" parent="Center/Panel/VBox/Row"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+text = "能还多少还多少"
+
+[node name="NoteLabel" type="Label" parent="Center/Panel/VBox"]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.549, 0.451, 0.341, 1)
+theme_override_font_sizes/font_size = 12
+text = "还款不能撤回。债务还清的那一刻，第一章就结束了。"
+autowrap_mode = 3
+
+[node name="Buttons" type="HBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 2
+
+[node name="CancelButton" type="Button" parent="Center/Panel/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 36)
+layout_mode = 2
+focus_mode = 0
+text = "取消"
+
+[node name="ConfirmButton" type="Button" parent="Center/Panel/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 36)
+layout_mode = 2
+theme_type_variation = &"BuyButton"
+focus_mode = 0
+text = "还款"

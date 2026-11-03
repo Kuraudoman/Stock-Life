@@ -1,0 +1,56 @@
+{
+	"_comment": "主角的预测台词。按情绪 → 结果（up_big / up_small / flat / down_small / down_big）分组；发烧另有一组。{stock} 为股票简称，{horizon} 为时间跨度。",
+	"predict": {
+		"calm": {
+			"up_big": ["{stock}……{horizon}，我觉得会大涨。盘面和消息都对得上。", "这支我有把握。{stock}，{horizon}，大涨。"],
+			"up_small": ["{stock}{horizon}应该会小涨一点。", "{stock}……稳稳地往上走吧，幅度不会太大。"],
+			"flat": ["{stock}{horizon}大概不会有什么动静。", "{stock}……看不出方向，应该是横盘。"],
+			"down_small": ["{stock}{horizon}可能会小跌，不是大问题。", "{stock}有点弱，会往下走一点。"],
+			"down_big": ["{stock}……{horizon}恐怕会大跌，小心。", "我不喜欢{stock}现在的样子。{horizon}，大跌。"]
+		},
+		"optimistic": {
+			"up_big": ["{stock}！{horizon}一定大涨，相信我！", "嘿嘿，{stock}要起飞了，{horizon}大涨~"],
+			"up_small": ["{stock}{horizon}会涨的，涨一点点也是涨嘛~", "{stock}看起来不错！小涨吧。"],
+			"flat": ["{stock}……嗯，暂时不动，但我觉得之后会涨！", "{stock}横盘蓄力中~"],
+			"down_small": ["{stock}{horizon}可能会小跌……没关系，跌了正好买！", "{stock}稍微歇一歇吧。"],
+			"down_big": ["诶……{stock}{horizon}会大跌？奇怪，我的心情明明这么好。", "{stock}要大跌……我、我应该没看错吧？"]
+		},
+		"pessimistic": {
+			"up_big": ["{stock}……{horizon}会大涨？我自己都不太信。", "唉，{stock}大概会大涨吧……反正我买不到。"],
+			"up_small": ["{stock}{horizon}可能涨一点……也可能是我看错了。", "{stock}小涨吧……大概。"],
+			"flat": ["{stock}……不动。就像我的账户一样。", "{stock}横盘，唉。"],
+			"down_small": ["{stock}{horizon}会跌的……什么都会跌的……", "{stock}小跌。唉。"],
+			"down_big": ["{stock}{horizon}要大跌了……我就知道。", "{stock}……大跌。别买，求你了。"]
+		}
+		,
+		"manic": {
+			"up_big": ["涨！{stock}{horizon}暴涨！全仓！现在！马上！", "金币……我看到金币在往{stock}里流！大涨！"],
+			"up_small": ["{stock}？涨！当然涨！说小涨是谦虚！", "{stock}也会涨的！所有的股票都会涨的！"],
+			"flat": ["{stock}在憋大招！马上就要涨了！", "横盘？不可能！{stock}一定是在蓄力！"],
+			"down_small": ["{stock}跌一点？那是上车的机会！", "小跌而已！{stock}很快会涨回来的！"],
+			"down_big": ["{stock}大跌？……不、不可能，一定是我看错了，那是黄金坑！", "跌？跌！跌了就加仓！"]
+		},
+		"panic": {
+			"up_big": ["{stock}会大涨……？不、不对，这一定是陷阱……", "大涨……可是，万一……"],
+			"up_small": ["{stock}{horizon}好像会涨一点……但我好害怕……", "小涨……大概……别、别信我。"],
+			"flat": ["{stock}……现在不动，可是马上就要崩了……", "横、横盘？暴风雨前的宁静……"],
+			"down_small": ["{stock}要跌了……快跑吧……", "跌……会跌的……"],
+			"down_big": ["要、要崩盘了！{stock}{horizon}大跌！快卖掉！", "{stock}……完了，大跌，全都完了……"]
+		}
+	},
+	"fever": {
+		"up": ["唔……我看到……金色的龙……在往上飞……是涨吧……", "{stock}……嘿嘿……涨……（烧得满脸通红）"],
+		"down": ["{stock}……往下……沉下去了……好冷……", "跌……天花板在转……也在往下掉……"],
+		"flat": ["{stock}……嗯……什么都没有……好晕……", "横……横……横着的冰袋……"]
+	},
+	"prefix": {
+		"tired": ["（打了个哈欠）", "（揉了揉眼睛）"],
+		"cold": ["（吸了吸鼻子）", "（隔着口罩）"]
+	},
+	"refuse": {
+		"no_left": "今天的直觉已经用完了……让我歇一歇吧。",
+		"too_tired": "我、我太累了……现在什么都看不出来。",
+		"hospital": "（躺在病床上）……医生说不准看报价牌。",
+		"closed": "今天已经收盘了，选“到明天收盘”或者“未来 3 个交易日”吧。"
+	}
+}

@@ -1,0 +1,8 @@
+# 统一换行符，避免 Windows / macOS 之间 .gd / .tscn 出现整文件差异
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ogg binary
+*.wav binary
+*.ttf binary
+*.otf binary

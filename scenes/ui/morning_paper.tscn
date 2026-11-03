@@ -1,0 +1,112 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/morning_paper.gd" id="1_paper"]
+[ext_resource type="Script" path="res://scripts/ui/portrait_view.gd" id="2_portrait"]
+
+[node name="MorningPaper" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_paper")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.2, 0.14, 0.08, 0.35)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(700, 0)
+layout_mode = 2
+theme_type_variation = &"FeaturePanel"
+
+[node name="VBox" type="VBoxContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="HBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Masthead" type="Label" parent="Center/Panel/VBox/Header"]
+layout_mode = 2
+theme_type_variation = &"RibbonLabel"
+theme_override_font_sizes/font_size = 18
+text = "金穗日报 · 晨报"
+
+[node name="DateLabel" type="Label" parent="Center/Panel/VBox/Header"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.549, 0.451, 0.341, 1)
+text = "4月1日 周一"
+horizontal_alignment = 2
+
+[node name="HSep" type="HSeparator" parent="Center/Panel/VBox"]
+layout_mode = 2
+
+[node name="Scroll" type="ScrollContainer" parent="Center/Panel/VBox"]
+custom_minimum_size = Vector2(0, 250)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Items" type="VBoxContainer" parent="Center/Panel/VBox/Scroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="HSep2" type="HSeparator" parent="Center/Panel/VBox"]
+layout_mode = 2
+
+[node name="Footer" type="HBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Heroine" type="Control" parent="Center/Panel/VBox/Footer"]
+custom_minimum_size = Vector2(64, 76)
+layout_mode = 2
+script = ExtResource("2_portrait")
+follow_state = true
+
+[node name="HintLabel" type="Label" parent="Center/Panel/VBox/Footer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.549, 0.451, 0.341, 1)
+theme_override_font_sizes/font_size = 12
+text = "「市场」栏的风声是前兆：真正的消息通常在 1–5 个交易日后出现，但不会告诉你是哪天。"
+autowrap_mode = 3
+
+[node name="CloseButton" type="Button" parent="Center/Panel/VBox/Footer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 38)
+layout_mode = 2
+size_flags_vertical = 4
+focus_mode = 0
+text = "收起"
+
+[node name="OpenButton" type="Button" parent="Center/Panel/VBox/Footer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 38)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"BuyButton"
+focus_mode = 0
+text = "开盘 ▶"
