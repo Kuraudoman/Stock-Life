@@ -48,7 +48,7 @@ M2（v0.4–v0.6，「系统扩展」）有四块：晚间行动与属性、好�
 ## 测试与平衡
 
 ```bash
-# 自动测试（156 项：日历、价格模型、交易规则、事件冲击、新闻日程与前兆、主角状态、晚间行动与属性、城区背景、
+# 自动测试（209 项：日历、价格模型、交易规则、事件冲击、新闻日程与前兆、主角状态、晚间行动与属性、城区背景、主角立绘、
 # 走势预测、诺艾尔的分析、第一章胜负、存档往返、版本 1 → 2 与 2 → 3 迁移）
 godot --headless --path . --script res://tools/run_tests.gd
 
@@ -104,6 +104,8 @@ godot --headless --path . --script res://tools/build_ui_assets.gd -- --pack "../
 代码里用到的颜色集中在 `scripts/ui/ui_style.gd`。主题里的变体：`FeaturePanel`（带金属包角的重点面板）、`RibbonLabel` / `RibbonTitle`（红色缎带标题）、`BuyButton` / `SellButton`、`StockRow`。
 
 晚间城区的背景是作者为本项目生成的 AI 插画（奥术蒸汽朋克，16:9），放在 `assets/backgrounds/city/`，说明见同目录的 `SOURCE.txt`。路径写在 `data/evening.json` 的 `background` 里，不写死在代码里。住所可以按等级换图：阁楼用 `home_attic.jpg`，以后的公寓、宅邸、浮空庄园只要在住房条目上加 `background`，没有就继续用阁楼那张。这些图会缩小显示，导入时带 mipmap，地图和侧栏单独用线性过滤，不跟着界面的最近邻走。
+
+主角希雅的半身立绘也是同一套 AI 流程，放在 `assets/portraits/heroine/`（见 `SOURCE.txt`）。白底用 `tools/cutout_portraits.py` 从边缘抠掉。身体状态优先于情绪：住院、发烧、感冒、疲劳各用一张整图，健康时才按平静 / 乐观 / 悲观 / 狂热 / 恐慌换。别的角色没有图时仍用代码画的占位立绘。
 
 ## 存档
 
@@ -171,6 +173,7 @@ stock-life/
 ├── data/                     # 见上文“数据文件”
 ├── assets/
 │   ├── backgrounds/city/     # 晚间城区插画（作者为本项目生成的 AI 图，见 SOURCE.txt）
+│   ├── portraits/heroine/    # 希雅的半身立绘（同一套 AI 图，见 SOURCE.txt）
 │   └── ui/
 │       ├── theme.tres        # 浅色像素主题：奶油纸面 + 木框 + 天空蓝底，中文使用系统字体
 │       └── kenney/           # 界面贴图，由 tools/build_ui_assets.gd 从 Kenney 素材包生成（CC0）
@@ -179,7 +182,8 @@ stock-life/
 │   ├── run_tests.gd          # 自动测试
 │   ├── build_ui_assets.gd    # 从 Kenney UI Pack 生成界面贴图
 │   ├── simulate.gd           # 批量行情模拟与第一章策略对比
-│   └── shot_evening.gd       # 把晚间城市地图画成 PNG（需要显示，不能用 --headless）
+│   ├── shot_evening.gd       # 把晚间城市地图画成 PNG（需要显示，不能用 --headless）
+│   └── cutout_portraits.py   # 从立绘边缘抠掉近白背景
 └── docs/GDD.md               # 设计文档
 ```
 

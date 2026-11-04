@@ -1,5 +1,5 @@
 extends SceneTree
-## 自动测试：价格模型可复现、涨跌停、交易规则、存档往返；M1：新闻、状态、预测、诺艾尔、第一章、存档迁移；M2：晚间行动点、城区背景、版本 2 → 3。
+## 自动测试：价格模型可复现、涨跌停、交易规则、存档往返；M1：新闻、状态、预测、诺艾尔、第一章、存档迁移；M2：晚间行动点、城区背景、主角立绘、版本 2 → 3。
 ## 用法：godot --headless --path . --script res://tools/run_tests.gd
 
 const Calendar := preload("res://scripts/core/calendar.gd")
@@ -9,6 +9,7 @@ const Events := preload("res://scripts/core/events.gd")
 const Life := preload("res://scripts/core/life.gd")
 const Evening := preload("res://scripts/core/evening.gd")
 const Predict := preload("res://scripts/core/predict.gd")
+const Painter := preload("res://scripts/ui/portrait_painter.gd")
 const Noelle := preload("res://scripts/core/noelle.gd")
 
 var failures := 0
@@ -27,6 +28,7 @@ func _initialize() -> void:
 	_test_life()
 	_test_evening_logic()
 	_test_city_backgrounds()
+	_test_heroine_portraits()
 	_test_predict_decide()
 	_test_noelle(companies)
 	await process_frame
@@ -586,6 +588,33 @@ func _test_city_backgrounds() -> void:
 	var attic := Evening.background_path(home, {"housing": "attic"})
 	var mansion := Evening.background_path(home, {"housing": "mansion"})
 	check(attic.ends_with("home_attic.jpg") and mansion == attic, "宅邸还没单独的图，回退到阁楼")
+
+
+func _test_heroine_portraits() -> void:
+	print("主角立绘")
+	var moods := ["calm", "optimistic", "pessimistic", "manic", "panic"]
+	var bodies := ["healthy", "tired", "cold", "fever", "hospital"]
+	var expect := {
+		"healthy": {"calm": "smile", "optimistic": "grin", "pessimistic": "frown", "manic": "coin", "panic": "panic"},
+		"tired": {"calm": "sleepy", "optimistic": "sleepy", "pessimistic": "sleepy", "manic": "sleepy", "panic": "sleepy"},
+		"cold": {"calm": "cold", "optimistic": "cold", "pessimistic": "cold", "manic": "cold", "panic": "cold"},
+		"fever": {"calm": "dizzy", "optimistic": "dizzy", "pessimistic": "dizzy", "manic": "dizzy", "panic": "dizzy"},
+		"hospital": {"calm": "hospital", "optimistic": "hospital", "pessimistic": "hospital", "manic": "hospital", "panic": "hospital"},
+	}
+	for body in bodies:
+		for mood in moods:
+			var layers: Dictionary = Painter.heroine_layers(mood, body)
+			var name := String(layers.expr)
+			check(name == String(expect[body][mood]) and (layers.overlays as Array).is_empty(),
+					"%s / %s → %s，不再叠占位道具" % [mood, body, name])
+			var tex := Painter.base_texture("heroine", name, layers.overlays)
+			check(tex != null and tex.get_width() == 864 and tex.get_height() == 1152,
+					"%s.png 能加载" % name)
+	var smile := Painter.texture("heroine", "smile")
+	check(Painter.base_texture("heroine", "cry", []) == smile, "对话里的 cry 退回 smile")
+	check(Painter.base_texture("heroine", "ecstatic", ["sparkle", "v_sign"]) == smile, "结局用的 ecstatic 退回 smile")
+	check(Painter.base_texture("heroine", "smile", ["blanket", "mask"]) == Painter.texture("heroine", "cold"),
+			"感冒的整图排在表情名前面")
 
 
 func _test_evening_flow() -> void:

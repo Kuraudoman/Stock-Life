@@ -85,13 +85,13 @@ func _show(i: int) -> void:
 	next_button.visible = true
 
 
-## 主角在对话里的表情（expr 用和其他角色相同的名字）。
+## 主角对话表情。这套立绘里没有的名字（目前是 cry）退回 smile，不再画占位道具。
+const HEROINE_ART := ["smile", "grin", "frown", "coin", "panic", "sleepy", "cold", "dizzy", "hospital"]
+
+
 func _heroine_layers(expr: String) -> Dictionary:
-	match expr:
-		"panic":
-			return {"expr": "panic", "overlays": ["sweat"]}
-		"cry":
-			return {"expr": "cry", "overlays": []}
+	if expr not in HEROINE_ART:
+		expr = "smile"
 	return {"expr": expr, "overlays": []}
 
 

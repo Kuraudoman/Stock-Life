@@ -1,10 +1,10 @@
 extends RefCounted
 ## 立绘绘制：有正式立绘就画图，没有就按角色配色画 Q 版占位半身像（GDD 第 9 节“MVP 占位”）。
 ## 正式立绘放在 assets/portraits/<角色 id 或公司 id>/ 下：
-##   <表情名>.png   整张半身立绘，表情名与 heroine_layers / mascot_layers / 对话的 expr 相同；
-##                  主角住院（叠加层含 pajama）用 hospital.png。
-##   fx_<叠加层>.png 透明叠加层（如 fx_eyebags、fx_mask、fx_blanket），和整图同尺寸、同位置，没有就不画。
-## 缺某个表情时退回 smile / normal，整个目录都没有图时退回占位画法，所以可以一个角色一个角色地替换。
+##   <表情名>.png   整张半身立绘。主角按身体优先：hospital / dizzy / cold / sleepy，
+##                  否则按情绪 smile / grin / frown / coin / panic。整张图已经包含道具，不再叠 fx_。
+##   fx_<叠加层>.png 透明叠加层，和整图同尺寸。主角有整图时不画。
+## 缺某个表情时退回 smile / normal，整个目录都没有图时退回占位画法。
 
 const UI := preload("res://scripts/ui/ui_style.gd")
 
@@ -45,8 +45,42 @@ static func mascot_look(company: Dictionary, feature: String) -> Dictionary:
 	}
 
 
-## 主角的情绪 / 身体状态 → 表情与叠加层（GDD 第 9 节“主角状态立绘”表）。
+## frown.png 的人物比其他几张低大约 90 像素，裁切时把这截空白让掉，头才对齐。
+const TOP_PAD := {"frown": 90.0}
+
+
+## 主角的情绪 / 身体状态 → 整张立绘。身体优先于情绪；有图就不加占位用的叠加层。
 static func heroine_layers(mood: String, body: String) -> Dictionary:
+	var expr := _heroine_expr(mood, body)
+	if texture("heroine", expr) != null:
+		return {"expr": expr, "overlays": []}
+	return _heroine_placeholder(mood, body)
+
+
+static func _heroine_expr(mood: String, body: String) -> String:
+	match body:
+		"hospital":
+			return "hospital"
+		"fever":
+			return "dizzy"
+		"cold":
+			return "cold"
+		"tired":
+			return "sleepy"
+	match mood:
+		"optimistic":
+			return "grin"
+		"pessimistic":
+			return "frown"
+		"manic":
+			return "coin"
+		"panic":
+			return "panic"
+	return "smile"
+
+
+## 没有正式立绘时的占位组合（Q 版 + 道具）。
+static func _heroine_placeholder(mood: String, body: String) -> Dictionary:
 	var expr := "smile"
 	var overlays: Array = []
 	match mood:
@@ -102,33 +136,52 @@ static func texture(who: String, name: String) -> Texture2D:
 	return _textures[path]
 
 
-## 选整张立绘：住院图 → 当前表情 → 默认表情。
+## 选整张立绘。住院、感冒的整图排在表情名前面（感冒以前只靠毯子和口罩叠加）。
+## 没有对应文件时退回 smile / normal。
 static func base_texture(who: String, expr: String, overlays: Array = []) -> Texture2D:
+	return resolve_texture(who, expr, overlays).tex
+
+
+static func resolve_texture(who: String, expr: String, overlays: Array = []) -> Dictionary:
 	if who == "":
-		return null
-	var names: Array = ["hospital"] if overlays.has("pajama") else []
+		return {"tex": null, "name": ""}
+	var names: Array = []
+	if overlays.has("pajama") or expr == "hospital":
+		names.append("hospital")
+	if expr == "cold" or (overlays.has("mask") and overlays.has("blanket")):
+		names.append("cold")
 	names.append(expr)
 	names.append_array(DEFAULT_EXPRS)
+	var seen := {}
 	for n in names:
-		var tex := texture(who, String(n))
+		var key := String(n)
+		if seen.has(key):
+			continue
+		seen[key] = true
+		var tex := texture(who, key)
 		if tex:
-			return tex
-	return null
+			return {"tex": tex, "name": key}
+	return {"tex": null, "name": ""}
 
 
 ## 在 r 里画一个角色。dim=true 时整体变暗（对话里不在说话的一方）。
 static func draw(ci: CanvasItem, r: Rect2, look: Dictionary, expr: String, overlays: Array = [], dim: bool = false) -> void:
 	var who := String(look.get("id", ""))
-	var base := base_texture(who, expr, overlays)
+	var resolved := resolve_texture(who, expr, overlays)
+	var base: Texture2D = resolved.tex
 	if base:
-		# 项目默认是像素风的最近邻过滤，高清立绘缩小时要用线性 + mipmap，否则会锯齿闪烁
-		if ci.texture_filter != CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS:
-			ci.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-		_draw_fitted(ci, r, base)
-		for o in overlays:
-			var fx := texture(who, "fx_" + String(o))
-			if fx:
-				_draw_fitted(ci, r, fx)
+		# 项目默认是像素风的最近邻过滤。高清立绘只在画这一张时改成线性 + mipmap，
+		# 画完改回去，木框贴图仍然是最近邻。
+		var prev_filter := ci.texture_filter
+		ci.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+		_draw_fitted(ci, r, base, float(TOP_PAD.get(String(resolved.name), 0.0)))
+		# 主角这套是整张图，道具已经画在里面。别的角色还可以用 fx_ 叠加。
+		if who != "heroine":
+			for o in overlays:
+				var fx := texture(who, "fx_" + String(o))
+				if fx:
+					_draw_fitted(ci, r, fx)
+		ci.texture_filter = prev_filter
 		if dim:
 			ci.draw_rect(r, Color(UI.PORTRAIT_BG, 0.45), true)
 		return
@@ -215,13 +268,16 @@ static func draw(ci: CanvasItem, r: Rect2, look: Dictionary, expr: String, overl
 		ci.draw_rect(r, Color(UI.PORTRAIT_BG, 0.45), true)
 
 
-## 把立绘铺满 r：等比放大到盖住整个框，水平居中、顶部对齐（保证头部在框内），多出的部分裁掉。
-static func _draw_fitted(ci: CanvasItem, r: Rect2, tex: Texture2D) -> void:
+## 把立绘铺满 r：等比放大到盖住整个框，水平居中。top_pad 是这张图顶部多出来的空白，
+## 裁切从那里开始，头才和别的表情齐。多出来的部分裁掉。
+static func _draw_fitted(ci: CanvasItem, r: Rect2, tex: Texture2D, top_pad: float = 0.0) -> void:
 	var ts := tex.get_size()
-	var scale := maxf(r.size.x / ts.x, r.size.y / ts.y)
-	var src_size := r.size / scale
-	var src := Rect2(Vector2((ts.x - src_size.x) * 0.5, 0), src_size)
-	ci.draw_texture_rect_region(tex, r, src)
+	var pad := clampf(top_pad, 0.0, ts.y * 0.25)
+	var usable_h := ts.y - pad
+	var scale := maxf(r.size.x / ts.x, r.size.y / usable_h)
+	var src_size := Vector2(minf(r.size.x / scale, ts.x), minf(r.size.y / scale, usable_h))
+	var origin := Vector2((ts.x - src_size.x) * 0.5, pad)
+	ci.draw_texture_rect_region(tex, r, Rect2(origin, src_size))
 
 
 static func _face(ci: CanvasItem, c: Vector2, R: float, look: Dictionary, expr: String) -> void:
