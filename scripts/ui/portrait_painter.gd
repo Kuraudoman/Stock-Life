@@ -269,8 +269,9 @@ static func _apply_modulate(ci: CanvasItem, dim: bool, tint: Color) -> void:
 	ci.modulate = m
 
 
-## 按整张图的高度定缩放（各表情一样大），水平居中。top_pad 是这张图头顶多出来的空白，
-## 从那里开始画，发带才和 smile 齐；多出来的云会被槽的上沿裁掉，不裁脸。
+## 按整张图的高度定缩放，各表情一样大，水平居中。
+## top_pad 是发带以上多出来的部分（雨云等）。整张图往上移这么多，发带仍和 smile 齐，
+## 多出来的头顶画到槽的上面，不裁掉。脚底因此会停在槽底上方——再往下拉就会把头发放大，头就对不齐了。
 ## 槽比图窄时只裁左右。
 static func _draw_fitted(ci: CanvasItem, r: Rect2, tex: Texture2D, top_pad: float = 0.0) -> void:
 	var ts := tex.get_size()
@@ -278,13 +279,11 @@ static func _draw_fitted(ci: CanvasItem, r: Rect2, tex: Texture2D, top_pad: floa
 		return
 	var pad := clampf(top_pad, 0.0, ts.y * 0.3)
 	var scale := r.size.y / ts.y
-	var src_h := ts.y - pad
 	var src_w := minf(r.size.x / scale, ts.x)
-	var origin := Vector2((ts.x - src_w) * 0.5, pad)
+	var origin := Vector2((ts.x - src_w) * 0.5, 0.0)
 	var dest_w := src_w * scale
-	var dest_h := src_h * scale
-	var dest := Rect2(r.position.x + (r.size.x - dest_w) * 0.5, r.position.y, dest_w, dest_h)
-	ci.draw_texture_rect_region(tex, dest, Rect2(origin, Vector2(src_w, src_h)))
+	var dest := Rect2(r.position.x + (r.size.x - dest_w) * 0.5, r.position.y - pad * scale, dest_w, ts.y * scale)
+	ci.draw_texture_rect_region(tex, dest, Rect2(origin, Vector2(src_w, ts.y)))
 
 
 static func _face(ci: CanvasItem, c: Vector2, R: float, look: Dictionary, expr: String) -> void:

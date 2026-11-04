@@ -34,17 +34,19 @@ func _initialize() -> void:
 	map.open_card("downtown")
 	await create_timer(0.25).timeout
 	_save("city-map-modal-downtown")
+	gs.player.mood = "pessimistic"
+	root.get_node("EventBus").player_changed.emit()
 	map.enter_district("harbor")
 	for _i in 4:
 		await process_frame
-	_save("city-map-district-harbor")
+	_save("city-map-district-frown")
 	map.queue_free()
 	await process_frame
 	var dialog = load("res://scenes/dialog.tscn").instantiate()
-	dialog.setup([{"who": "heroine", "expr": "smile", "text": "今天的盘面很安静。"}], [])
+	dialog.setup([{"who": "heroine", "expr": "frown", "text": "今天的盘面让人提不起劲。"}], [])
 	root.add_child(dialog)
 	await create_timer(0.45).timeout
-	_save("heroine-dialog-calm")
+	_save("heroine-dialog-frown")
 	dialog.queue_free()
 	await process_frame
 	var bg := ColorRect.new()
@@ -76,12 +78,12 @@ func _initialize() -> void:
 		cell.expr = exprs[i]
 		var col := i % 4
 		var row := i / 4
-		cell.position = Vector2(col * 320, row * 240)
-		cell.size = Vector2(320, 240)
+		cell.position = Vector2(col * 320, 48 + row * 220)
+		cell.size = Vector2(320, 210)
 		root.add_child(cell)
 		var label := Label.new() as Label
 		label.text = exprs[i]
-		label.position = cell.position + Vector2(8, 4)
+		label.position = cell.position + Vector2(8, cell.size.y - 22)
 		label.add_theme_color_override("font_color", Color.WHITE)
 		root.add_child(label)
 	for _i in 4:
