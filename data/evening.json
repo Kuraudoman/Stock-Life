@@ -1,0 +1,216 @@
+{
+	"_comment": "晚间城市地图、行动点与生活属性（GDD 第 4、6、7、10 节）。改数值和文案不用改代码。第一章的平衡假设见 README：什么都不做直接睡觉 = 旧版「早点休息」；外出行动会少掉这次休息加成。好感传闻、内幕调查、对手大户只留钩子，不在这里发情报。",
+	"ap": {
+		"weekday": 2,
+		"offday": 4,
+		"tired_penalty": 1,
+		"min_ap": 1,
+		"transport_cap": 2
+	},
+	"rules": {
+		"exp_cap": 100,
+		"optimistic_social_bonus": 1,
+		"pessimistic_stress_mult": 1.15,
+		"fame_profit_threshold": 0.05,
+		"fame_profit_gain": 2,
+		"fame_cap": 100,
+		"salon_fame": 25,
+		"extra_rest_hp": 8,
+		"extra_rest_stress": -6
+	},
+	"housing": [
+		{"id": "attic", "name": "阁楼", "cost": 0, "sleep_hp": 0, "sleep_stress": 0, "invite": false, "background": "res://assets/backgrounds/city/home_attic.jpg", "blurb": "交易所塔楼对面的小阁楼，屋顶偶尔漏雨。"},
+		{"id": "apartment", "name": "公寓", "cost": 15000, "sleep_hp": 6, "sleep_stress": 3, "invite": false, "blurb": "学院区的一间公寓，终于有一张不咯吱响的床。"},
+		{"id": "mansion", "name": "宅邸", "cost": 90000, "sleep_hp": 12, "sleep_stress": 6, "invite": true, "blurb": "贵族区边缘的宅邸，客厅够请客了。"},
+		{"id": "estate", "name": "浮空庄园", "cost": 320000, "sleep_hp": 18, "sleep_stress": 10, "invite": true, "blurb": "停在云上的庄园。第一章几乎买不起。"}
+	],
+	"transport": [
+		{"id": "walk", "name": "步行", "cost": 0, "ap": 0, "fame": 0, "blurb": "两条腿走遍奥鲁姆。"},
+		{"id": "carriage", "name": "马车", "cost": 8000, "ap": 1, "fame": 0, "blurb": "雇一辆马车，每晚多一个行动点。"},
+		{"id": "car", "name": "魔导车", "cost": 40000, "ap": 2, "fame": 2, "blurb": "魔晶石引擎的小车。行动点加到上限。"},
+		{"id": "dragon", "name": "私人飞龙", "cost": 180000, "ap": 2, "fame": 6, "blurb": "从屋顶直接起飞。行动点已经到顶，名声会跟着响。"}
+	],
+	"wardrobe": [
+		{"id": "plain", "name": "平民服", "cost": 0, "fame": 0, "salon": false, "blurb": "见习交易员的旧外套。"},
+		{"id": "formal", "name": "正装", "cost": 2500, "fame": 3, "salon": false, "blurb": "深蓝色正装。拜访时不至于被拦在门外。"},
+		{"id": "noble", "name": "贵族礼服", "cost": 24000, "fame": 8, "salon": true, "blurb": "绣金线的礼服，贵族沙龙认这个。"}
+	],
+	"locations": [
+		{"id": "home", "name": "住所", "area": "下城边缘", "x": 0.04, "y": 0.56, "w": 0.28, "h": 0.38, "color": "#e4c98a", "background": "res://assets/backgrounds/city/home_attic.jpg", "background_track": "housing", "blurb": "今晚回自己的住处。什么都不做直接睡觉，就等于早点休息。", "actions": ["rest", "review", "upgrade_housing", "invite"]},
+		{"id": "downtown", "name": "下城", "area": "酒馆与黑鸦", "x": 0.04, "y": 0.06, "w": 0.28, "h": 0.46, "color": "#d2b8dc", "background": "res://assets/backgrounds/city/lower_town.jpg", "blurb": "酒馆、报社的后门和黑鸦商会的暗门都在这条街上。小游戏还没开张。", "actions": ["visit_mia", "tavern", "entertain", "insider"]},
+		{"id": "academy", "name": "学院区", "area": "帝国魔导学院", "x": 0.36, "y": 0.06, "w": 0.30, "h": 0.36, "color": "#b7d4ee", "background": "res://assets/backgrounds/city/academy.jpg", "blurb": "图书馆的灯还亮着。进修让判断慢慢变准，最多相当于正确率 +10%，界面上不显示那个数字。", "actions": ["study"]},
+		{"id": "industry", "name": "魔导工业区", "area": "工坊与精炼厂", "x": 0.70, "y": 0.06, "w": 0.26, "h": 0.36, "color": "#e0cbb0", "background": "res://assets/backgrounds/city/industrial.jpg", "blurb": "艾尔德魔导工坊的烟囱还在冒白烟。车间门关着。", "actions": ["investigate_elder"]},
+		{"id": "avenue", "name": "金穗大道", "area": "交易所与银行", "x": 0.36, "y": 0.46, "w": 0.30, "h": 0.24, "color": "#f0d48a", "background": "res://assets/backgrounds/city/golden_avenue.jpg", "blurb": "皇家交易所已经打烊。帝国银行的灯还亮着，柜台上写着融资业务以后才开办。", "actions": ["charity", "upgrade_transport"]},
+		{"id": "harbor", "name": "港区", "area": "龙运码头", "x": 0.70, "y": 0.46, "w": 0.26, "h": 0.24, "color": "#9ec8d8", "background": "res://assets/backgrounds/city/harbor.jpg", "blurb": "龙脊运输的飞龙在码头上歇着，翅膀收得整整齐齐。", "actions": ["investigate_dragonspine"]},
+		{"id": "noble", "name": "贵族区", "area": "沙龙与歌剧院", "x": 0.36, "y": 0.74, "w": 0.60, "h": 0.20, "color": "#f0c6d4", "background": "res://assets/backgrounds/city/noble.jpg", "blurb": "灯火通明。有人说格兰兹家的维多利亚也在这一带，今晚未必见得到本人。", "actions": ["salon", "upgrade_wardrobe"]}
+	],
+	"actions": {
+		"rest": {
+			"name": "早点休息",
+			"kind": "rest",
+			"ap": 1,
+			"gold": 0,
+			"once": false,
+			"blurb": "把这段时间用来睡觉。第一次和「什么都不做直接睡」一样；再休息一次，还能多恢复一点。",
+			"log": "你把灯吹了，决定把剩下的时间用来睡觉。"
+		},
+		"review": {
+			"name": "和诺艾尔复盘",
+			"kind": "review",
+			"ap": 1,
+			"gold": 0,
+			"hp": -3,
+			"stress": 0,
+			"once": true,
+			"affection": {"noelle": 3},
+			"social": true,
+			"blurb": "让诺艾尔把接下来几天的风声过一遍。她会熬夜，你好感上升，觉就没那么好睡。",
+			"log": "诺艾尔把账本又翻开了。"
+		},
+		"study": {
+			"name": "学院进修",
+			"kind": "study",
+			"ap": 1,
+			"gold": 80,
+			"hp": -5,
+			"stress": 2,
+			"exp": 8,
+			"once": true,
+			"blurb": "在图书馆坐到灯油见底。经验积满 100 时，预测正确率最多 +10%（界面不显示这个数）。今晚会少睡。",
+			"log": "灯油烧完了。进修 +{exp}，睡觉时再结算体力。"
+		},
+		"upgrade_housing": {
+			"name": "升级住所",
+			"kind": "upgrade",
+			"track": "housing",
+			"ap": 1,
+			"once": true,
+			"blurb": "换一间睡得着的屋子。每晚多恢复体力、多降一点压力。宅邸以上才能请客。"
+		},
+		"upgrade_transport": {
+			"name": "升级交通",
+			"kind": "upgrade",
+			"track": "transport",
+			"ap": 1,
+			"once": true,
+			"blurb": "马车和魔导车让每晚的行动点变多，最多 +2。飞龙不再加行动点，但很招眼。"
+		},
+		"upgrade_wardrobe": {
+			"name": "定做衣服",
+			"kind": "upgrade",
+			"track": "wardrobe",
+			"ap": 1,
+			"once": true,
+			"blurb": "正装增加名声。贵族礼服可以直接走进沙龙。"
+		},
+		"visit_mia": {
+			"name": "拜访米娅",
+			"kind": "social",
+			"hook": "rumor",
+			"target": "mia",
+			"social": true,
+			"ap": 1,
+			"once": true,
+			"affection": {"mia": 2},
+			"blurb": "去《金穗日报》的排字房坐坐。她现在只跟你闲聊，独家消息以后才肯说。",
+			"log": "米娅的耳朵抖了抖：「独家？你来得太早了。常来坐坐，我才有得讲。」"
+		},
+		"tavern": {
+			"name": "酒馆听传闻",
+			"kind": "hook",
+			"hook": "rumor",
+			"target": "tavern",
+			"ap": 1,
+			"gold": 40,
+			"stress": -3,
+			"once": true,
+			"blurb": "花一点酒钱听一耳朵。具体是哪支股票、是真是假，这版还不会告诉你。",
+			"log": "你在酒馆坐到打烊，只听到有人拍桌子吹嘘「三天翻倍」。哪支股票，没人说得清。"
+		},
+		"entertain": {
+			"name": "下城消遣",
+			"kind": "entertain",
+			"ap": 1,
+			"gold": 80,
+			"hp": 2,
+			"stress": -12,
+			"once": true,
+			"blurb": "听一会儿歌，不打听消息。地行龙竞速和酒馆卡牌还没开张。",
+			"log": "琴声很吵，肩膀倒是松下来了。小游戏的牌子还翻在背面。"
+		},
+		"insider": {
+			"name": "向渡鸦夫人买内幕",
+			"kind": "hook",
+			"hook": "insider",
+			"target": "raven",
+			"locked": true,
+			"ap": 1,
+			"gold": 3000,
+			"heat": 15,
+			"once": true,
+			"blurb": "非常准的消息，代价是金币和调查度。这版她还不肯开这个价。",
+			"lock_reason": "渡鸦夫人把折扇一合：「内幕的账，现在还不开。」调查度的规矩留到以后。",
+			"log": ""
+		},
+		"investigate_elder": {
+			"name": "看看魔导工坊",
+			"kind": "hook",
+			"hook": "investigate",
+			"target": "elder",
+			"ap": 1,
+			"fame": 1,
+			"once": true,
+			"blurb": "到厂区门口转一圈。门卫不让进车间，查得到的东西以后才会写进晨报。",
+			"log": "艾尔德魔导工坊灯火通明。你没能靠近熔炉，只记下了烟的颜色。"
+		},
+		"investigate_dragonspine": {
+			"name": "看看龙运码头",
+			"kind": "hook",
+			"hook": "investigate",
+			"target": "dragonspine",
+			"ap": 1,
+			"fame": 1,
+			"once": true,
+			"blurb": "数一数停着的飞龙。运输股的实地调查还没接上行情。",
+			"log": "码头上空着一半的栏位。管事的说：「明天的货单，不给外人看。」"
+		},
+		"charity": {
+			"name": "教会募捐",
+			"kind": "charity",
+			"ap": 1,
+			"gold": 500,
+			"fame": 2,
+			"once": true,
+			"blurb": "往圣光教会的募捐箱里放一笔金币。名声会慢慢传开，沙龙认名声。",
+			"log": "金币落进募捐箱。路过的人记住了你的脸。"
+		},
+		"salon": {
+			"name": "贵族沙龙",
+			"kind": "social",
+			"hook": "rival",
+			"target": "victoria",
+			"social": true,
+			"ap": 1,
+			"fame": 2,
+			"once": true,
+			"requires_fame": 25,
+			"requires_salon_wardrobe": true,
+			"blurb": "进去听听贵人们在谈谁。维多利亚本人和她的大单，这版还不会出现。",
+			"lock_reason": "门房看了你一眼：「沙龙不招待这个打扮。」名声达到 25，或换上贵族礼服再来。",
+			"log": "沙龙里都在小声说格兰兹家的维多利亚。她今晚没出现，也没有人替她下单。"
+		},
+		"invite": {
+			"name": "请客来访",
+			"kind": "hook",
+			"hook": "invite",
+			"locked": true,
+			"requires_invite": true,
+			"ap": 1,
+			"once": true,
+			"blurb": "住所够大之后，可以请人上门。角色来访属于后面的好感系统。",
+			"lock_reason": "登门拜访的日程还没排上。",
+			"lock_reason_small": "这间屋子转个身都会碰到桌子，请不了客人。",
+			"log": ""
+		}
+	}
+}

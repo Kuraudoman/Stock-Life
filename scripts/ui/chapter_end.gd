@@ -45,8 +45,8 @@ func _ready() -> void:
 		"%s的预测：%d 次，回顾 %d 次，说中 %d 次" % [String(GameState.player.get("name", "希雅")), int(result.get("pred_made", 0)), resolved, hits],
 		"诺艾尔好感：%d" % int(result.get("affection", 0)),
 		"",
-		("第二章 · 繁荣尚未开放。可以继续在奥鲁姆自由交易，杠杆、做空和晚间行动会在之后的版本加入。" if ok
-				else "标题画面的「继续」会回到期限前一天的收盘（失败时不会覆盖自动存档），可以再试一次。"),
+		("第二章 · 繁荣尚未开放。可以继续自由交易。好感传闻、内幕调查、对手大户、杠杆和做空会在之后的版本加入。" if ok
+				else "标题画面的「继续」会回到期限当天开盘前（失败时不会覆盖自动存档），可以再试一次。"),
 	]
 	stats.text = "\n".join(lines)
 	continue_button.visible = ok

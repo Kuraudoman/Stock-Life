@@ -93,6 +93,11 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "调查度 0"
 
+[node name="FameLabel" type="Label" parent="Margin/Root/TopBar/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "名声 0"
+
 [node name="DeadlineLabel" type="Label" parent="Margin/Root/TopBar/TopRow"]
 unique_name_in_owner = true
 layout_mode = 2

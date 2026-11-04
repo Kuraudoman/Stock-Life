@@ -137,23 +137,15 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.549, 0.451, 0.341, 1)
 theme_override_font_sizes/font_size = 13
-text = "今晚怎么过？（已自动存档）"
+text = "去城里过今晚吧。（已自动存档）"
 
-[node name="RestButton" type="Button" parent="Center/Panel/VBox/Buttons"]
+[node name="CityButton" type="Button" parent="Center/Panel/VBox/Buttons"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(150, 38)
+custom_minimum_size = Vector2(200, 38)
 layout_mode = 2
-tooltip_text = "体力 +10，压力 −8"
+tooltip_text = "工作日 2 个行动点，休市日 4 个。什么都不做直接睡觉，等于早点休息。"
 focus_mode = 0
-text = "早点休息"
-
-[node name="ReviewButton" type="Button" parent="Center/Panel/VBox/Buttons"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(170, 38)
-layout_mode = 2
-tooltip_text = "诺艾尔好感 +3，体力 −3，听她分析接下来几天的风声"
-focus_mode = 0
-text = "和诺艾尔复盘"
+text = "去城里走走 ▶"
 
 [node name="FinalButton" type="Button" parent="Center/Panel/VBox/Buttons"]
 unique_name_in_owner = true

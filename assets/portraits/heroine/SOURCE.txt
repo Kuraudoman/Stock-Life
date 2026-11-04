@@ -1,0 +1,20 @@
+主角希雅的半身立绘
+
+这些图由作者自己抠好透明背景后放进仓库，尺寸 1088×1440。
+文件名和用法见上一级的 README.md。
+
+tools/cutout_portraits.py 是旧的可选抠图脚本，不是这些文件的来源。
+
+不是像素素材。导入时生成 mipmap，绘制时单独用线性过滤。
+
+- smile.png     平静
+- grin.png      乐观
+- frown.png     悲观
+- coin.png      狂热
+- panic.png     恐慌
+- sleepy.png    疲劳
+- cold.png      感冒
+- dizzy.png     发烧
+- hospital.png  住院
+- cry.png       对话里的哭（失败）
+- ecstatic.png  结局里的高兴

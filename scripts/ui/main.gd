@@ -13,6 +13,7 @@ const DialogScene := preload("res://scenes/dialog.tscn")
 const PaperScene := preload("res://scenes/ui/morning_paper.tscn")
 const PredictScene := preload("res://scenes/ui/predict_popup.tscn")
 const SummaryScene := preload("res://scenes/ui/day_summary.tscn")
+const CityScene := preload("res://scenes/city_map.tscn")
 const ChapterEndScene := preload("res://scenes/ui/chapter_end.tscn")
 const RepayScene := preload("res://scenes/ui/repay_dialog.tscn")
 
@@ -27,6 +28,7 @@ const TITLE_SCENE := "res://scenes/title.tscn"
 @onready var hp_label: Label = %HpLabel
 @onready var stress_label: Label = %StressLabel
 @onready var heat_label: Label = %HeatLabel
+@onready var fame_label: Label = %FameLabel
 @onready var deadline_label: Label = %DeadlineLabel
 @onready var repay_button: Button = %RepayButton
 @onready var save_button: Button = %SaveButton
@@ -233,6 +235,9 @@ func _on_game_loaded() -> void:
 			_post("【读档】今天已收盘。", "info")
 			if not GameState.last_summary.is_empty():
 				_enqueue(_make_summary.bind(GameState.last_summary), _on_summary_closed)
+		GameState.Phase.EVENING:
+			_post("【读档】今晚还在城里。", "info")
+			_enqueue(_make_city, _on_city_closed)
 
 
 func _clear_queue() -> void:
@@ -273,6 +278,8 @@ func _on_action() -> void:
 				GameState.next_day()
 			else:
 				_enqueue(_make_summary.bind(GameState.last_summary), _on_summary_closed)
+		GameState.Phase.EVENING:
+			_enqueue(_make_city, _on_city_closed)
 
 
 func _on_market_opened(_d: int) -> void:
@@ -299,21 +306,17 @@ func _on_summary_closed(result: Variant) -> void:
 			var id := "cleared" if bool(r.get("success", false)) else "failed"
 			_enqueue(func(): return _make_tutorial(id))
 			_enqueue(_make_chapter_end.bind(r), _on_chapter_end_closed)
-		"review":
-			var tips := GameState.choose_evening("review")
-			var nl: Dictionary = GameState.noelle_lines
-			var lines: Array = [{"who": "noelle", "expr": "normal", "text": _pick(nl.get("review_open", ["……"]))}]
-			for tip in tips:
-				lines.append({"who": "noelle", "expr": "normal", "text": String(tip)})
-			lines.append({"who": "noelle", "expr": "smile", "text": _pick(nl.get("review_close", ["……"]))})
-			_enqueue(_make_dialog.bind(lines), func(_r): GameState.next_day())
-		"rest":
-			GameState.choose_evening("rest")
-			GameState.next_day()
+		"city":
+			GameState.open_evening("weekday")
+			_enqueue(_make_city, _on_city_closed)
 
 
-func _pick(list: Array) -> String:
-	return String(list[randi() % list.size()]) if not list.is_empty() else ""
+func _make_city() -> Control:
+	return CityScene.instantiate()
+
+
+func _on_city_closed(_result: Variant) -> void:
+	_refresh_all()
 
 
 func _make_chapter_end(result: Dictionary) -> Control:
@@ -325,8 +328,8 @@ func _make_chapter_end(result: Dictionary) -> Control:
 func _on_chapter_end_closed(result: Variant) -> void:
 	if result == "continue":
 		if GameState.phase == GameState.Phase.CLOSED:
-			GameState.choose_evening("rest")
-			GameState.next_day()
+			GameState.open_evening("weekday")
+			_enqueue(_make_city, _on_city_closed)
 		return
 	get_tree().change_scene_to_file(TITLE_SCENE)
 
@@ -431,6 +434,9 @@ func _refresh_top() -> void:
 	hp_label.text = "体力 %d" % int(p.get("hp", 100))
 	stress_label.text = "压力 %d" % int(p.get("stress", 0))
 	heat_label.text = "调查度 %d" % int(p.get("heat", 0))
+	heat_label.tooltip_text = "用内幕或操纵股价会上升。这套规矩还没开。"
+	fame_label.text = "名声 %d" % int(p.get("fame", 0))
+	fame_label.tooltip_text = GameState.asset_summary()
 	match GameState.chapter_state:
 		"active":
 			var left := GameState.trading_days_left()
@@ -517,6 +523,11 @@ func _refresh_bottom() -> void:
 			phase_label.text = "已收盘"
 			action_button.text = "收盘结算 ▶" if not GameState.last_summary.is_empty() else "进入下一天 ▶"
 			action_button.disabled = GameState.chapter_state == "failed"
+			finish_button.visible = false
+		GameState.Phase.EVENING:
+			phase_label.text = "晚间"
+			action_button.text = "城市地图 ▶"
+			action_button.disabled = false
 			finish_button.visible = false
 
 
