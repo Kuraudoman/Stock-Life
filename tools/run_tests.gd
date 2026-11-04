@@ -666,16 +666,23 @@ func _test_heroine_portraits() -> void:
 	var ecstatic := Painter.texture("heroine", "ecstatic")
 	check(cry != null and cry.get_width() == 864 and Painter.base_texture("heroine", "cry", []) == cry, "对话里的 cry 用 cry.png")
 	check(ecstatic != null and Painter.base_texture("heroine", "ecstatic", ["sparkle", "v_sign"]) == ecstatic, "结局的 ecstatic 用 ecstatic.png")
-	var chars: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/characters.json")).characters
-	var want := {"heroine": "#3b6fb6", "noelle": "#2f7d62", "raven": "#b23a48", "mia": "#f0a35e"}
-	for id in want:
-		var hex := String(chars[id].get("outline", "")).to_lower()
-		var col := Color.html(hex)
-		check(hex == String(want[id]) and col.a > 0.99, "%s 的描边颜色 %s" % [id, hex])
-		var look := Painter.look_of(chars[id], id)
-		check((look.outline as Color).is_equal_approx(col), "%s 的描边进了立绘配色" % id)
 	check(Painter.base_texture("heroine", "smile", ["blanket", "mask"]) == Painter.texture("heroine", "cold"),
 			"感冒的整图排在表情名前面")
+	var chars: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/characters.json")).characters
+	check(not chars.heroine.has("outline"), "角色数据里不再写代码描边")
+	check(Painter.wants_outline() == false, "现在默认显示不带描边的立绘")
+	var plain: PackedStringArray = Painter.variant_stems("panic", false)
+	var lined: PackedStringArray = Painter.variant_stems("panic", true)
+	check(String(plain[0]) == "panic" and String(plain[1]) == "panic_outline", "关描边时先找不带描边的文件")
+	check(String(lined[0]) == "panic_outline" and String(lined[1]) == "panic", "开描边时先找 _outline")
+	var prefer: Dictionary = Painter.resolve_prefer("heroine", "coin", [], true)
+	check(prefer.tex == Painter.texture("heroine", "coin") and String(prefer.file) == "coin" and String(prefer.name) == "coin",
+			"没有描边版时退回同一表情的无描边图")
+	var missing: Dictionary = Painter.resolve_prefer("heroine", "no_such_expr", [], true)
+	check(missing.tex == Painter.texture("heroine", "smile") and String(missing.name) == "smile" and String(missing.file) == "smile",
+			"表情两套都没有时退回 smile")
+	var gone: Dictionary = Painter.resolve_prefer("no_such_person", "smile", [], false)
+	check(gone.tex == null and String(gone.name) == "", "两套都没有就交给占位立绘")
 
 
 func _test_evening_flow() -> void:

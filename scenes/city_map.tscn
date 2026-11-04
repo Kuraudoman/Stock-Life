@@ -227,31 +227,35 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.6)
 
-[node name="Card" type="PanelContainer" parent="Modal"]
-unique_name_in_owner = true
+[node name="Center" type="CenterContainer" parent="Modal"]
 layout_mode = 1
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -280.0
-offset_top = -250.0
-offset_right = 280.0
-offset_bottom = 250.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Card" type="PanelContainer" parent="Modal/Center"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(560, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 theme_type_variation = &"FeaturePanel"
 
-[node name="CardMargin" type="MarginContainer" parent="Modal/Card"]
+[node name="CardMargin" type="MarginContainer" parent="Modal/Center/Card"]
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
-[node name="CardBox" type="VBoxContainer" parent="Modal/Card/CardMargin"]
+[node name="CardBox" type="VBoxContainer" parent="Modal/Center/Card/CardMargin"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ModalTitle" type="Label" parent="Modal/Card/CardMargin/CardBox"]
+[node name="ModalTitle" type="Label" parent="Modal/Center/Card/CardMargin/CardBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.659, 0.345, 0.122, 1)
@@ -259,7 +263,7 @@ theme_override_font_sizes/font_size = 20
 text = "港区"
 horizontal_alignment = 1
 
-[node name="ModalImage" type="TextureRect" parent="Modal/Card/CardMargin/CardBox"]
+[node name="ModalImage" type="TextureRect" parent="Modal/Center/Card/CardMargin/CardBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 230)
 layout_mode = 2
@@ -268,22 +272,24 @@ texture_filter = 4
 expand_mode = 1
 stretch_mode = 6
 
-[node name="ModalBlurb" type="Label" parent="Modal/Card/CardMargin/CardBox"]
+[node name="ModalBlurb" type="Label" parent="Modal/Center/Card/CardMargin/CardBox"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(528, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "……"
 autowrap_mode = 3
 
-[node name="ModalNote" type="Label" parent="Modal/Card/CardMargin/CardBox"]
+[node name="ModalNote" type="Label" parent="Modal/Center/Card/CardMargin/CardBox"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(528, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.549, 0.451, 0.341, 1)
 theme_override_font_sizes/font_size = 13
 text = ""
 autowrap_mode = 3
 
-[node name="GoButton" type="Button" parent="Modal/Card/CardMargin/CardBox"]
+[node name="GoButton" type="Button" parent="Modal/Center/Card/CardMargin/CardBox"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2

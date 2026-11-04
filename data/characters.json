@@ -1,10 +1,10 @@
 {
-	"_comment": "角色设定与占位立绘的配色（GDD 第 3、9 节）。正式立绘到位前，立绘由 scripts/ui/portrait_painter.gd 按这里的颜色画剪影头像。feature 为头饰 / 特征：ribbon 发带、elf 精灵耳 + 眼镜、veil 面纱、cat 猫耳、goggles 护目镜、horns 龙角、hat 尖帽、kerchief 头巾、headband 头带。",
+	"_comment": "角色设定与占位立绘的配色（GDD 第 3、9 节）。没有正式立绘时，scripts/ui/portrait_painter.gd 按这里的颜色画剪影头像。描边画在图里，不在这里配色；用哪一套图看 data/ui.json 的 portrait_outline。feature 为头饰 / 特征：ribbon 发带、elf 精灵耳 + 眼镜、veil 面纱、cat 猫耳、goggles 护目镜、horns 龙角、hat 尖帽、kerchief 头巾、headband 头带。",
 	"characters": {
-		"heroine": {"name": "希雅", "title": "见习交易员", "hair": "#e3b46a", "eyes": "#3b6fb6", "outfit": "#34508a", "accent": "#e0b048", "outline": "#3b6fb6", "feature": "ribbon"},
-		"noelle": {"name": "诺艾尔", "title": "精灵族会计师 · 秘书", "hair": "#cfe2d6", "eyes": "#2f7d62", "outfit": "#2f5d50", "accent": "#c9b37a", "outline": "#2f7d62", "feature": "elf"},
-		"raven": {"name": "渡鸦夫人", "title": "黑鸦商会会长", "hair": "#2b2233", "eyes": "#b23a48", "outfit": "#4a2342", "accent": "#a88b5a", "outline": "#b23a48", "feature": "veil"},
-		"mia": {"name": "米娅", "title": "《金穗日报》记者", "hair": "#f0a35e", "eyes": "#5a8c3a", "outfit": "#8a5a3c", "accent": "#f4e1b0", "outline": "#f0a35e", "feature": "cat"}
+		"heroine": {"name": "希雅", "title": "见习交易员", "hair": "#e3b46a", "eyes": "#3b6fb6", "outfit": "#34508a", "accent": "#e0b048", "feature": "ribbon"},
+		"noelle": {"name": "诺艾尔", "title": "精灵族会计师 · 秘书", "hair": "#cfe2d6", "eyes": "#2f7d62", "outfit": "#2f5d50", "accent": "#c9b37a", "feature": "elf"},
+		"raven": {"name": "渡鸦夫人", "title": "黑鸦商会会长", "hair": "#2b2233", "eyes": "#b23a48", "outfit": "#4a2342", "accent": "#a88b5a", "feature": "veil"},
+		"mia": {"name": "米娅", "title": "《金穗日报》记者", "hair": "#f0a35e", "eyes": "#5a8c3a", "outfit": "#8a5a3c", "accent": "#f4e1b0", "feature": "cat"}
 	},
 	"mascot_features": {
 		"elder": "goggles",

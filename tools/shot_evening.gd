@@ -1,5 +1,5 @@
 extends SceneTree
-## 把晚间大地图画下来：空闲、悬停金穗大道、悬停住所、港区卡片、进入港区。
+## 把晚间大地图画下来：空闲、悬停、港区卡片、住所卡片、进入港区，以及不带代码描边的对话。
 ## 无头模式没有画面，需要有显示。
 ## godot --path . --script res://tools/shot_evening.gd
 
@@ -28,10 +28,19 @@ func _initialize() -> void:
 	map.open_card("harbor")
 	await create_timer(0.25).timeout
 	_save("city-map-modal-harbor")
-	map.enter_district("harbor")
-	for _i in 4:
-		await process_frame
-	_save("city-map-district-harbor")
+	map.open_card("home")
+	await create_timer(0.25).timeout
+	_save("city-map-modal-home")
+	map.open_card("downtown")
+	await create_timer(0.25).timeout
+	_save("city-map-modal-downtown")
+	map.queue_free()
+	await process_frame
+	var dialog = load("res://scenes/dialog.tscn").instantiate()
+	dialog.setup([{"who": "heroine", "expr": "smile", "text": "今天的盘面很安静。"}], [])
+	root.add_child(dialog)
+	await create_timer(0.45).timeout
+	_save("heroine-dialog-calm")
 	quit()
 
 

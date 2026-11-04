@@ -1,19 +1,23 @@
 extends RefCounted
 ## 立绘绘制：有正式立绘就画图，没有就按角色配色画 Q 版占位半身像（GDD 第 9 节“MVP 占位”）。
 ## 正式立绘放在 assets/portraits/<角色 id 或公司 id>/ 下：
-##   <表情名>.png   整张半身立绘。主角按身体优先：hospital / dizzy / cold / sleepy，
-##                  否则按情绪 smile / grin / frown / coin / panic。整张图已经包含道具，不再叠 fx_。
-##   fx_<叠加层>.png 透明叠加层，和整图同尺寸。主角有整图时不画。
-## 缺某个表情时退回 smile / normal，整个目录都没有图时退回占位画法。
+##   <表情名>.png          不带描边
+##   <表情名>_outline.png  画好描边的同一张
+## 用哪一套由 data/ui.json 的 portrait_outline 决定。选中的那张没有，就换另一套，
+## 再退回 smile / normal，整个目录都没有图时退回占位画法。
+## 主角按身体优先：hospital / dizzy / cold / sleepy，否则按情绪 smile / grin / frown / coin / panic。
+## 整张图已经包含道具，不再叠 fx_。fx_<叠加层>.png 只给占位画法用。
 
 const UI := preload("res://scripts/ui/ui_style.gd")
-const OUTLINE_SHADER := preload("res://assets/shaders/portrait_outline.gdshader")
 
 const PORTRAIT_DIR := "res://assets/portraits"
+const UI_PATH := "res://data/ui.json"
 ## 缺表情时依次尝试的默认表情。
 const DEFAULT_EXPRS := ["smile", "normal"]
 
 static var _textures := {}
+static var _ui_loaded := false
+static var _ui: Dictionary = {}
 
 const SKIN := Color(1.0, 0.91, 0.83)
 const SKIN_SHADE := Color(0.93, 0.76, 0.66)
@@ -32,7 +36,6 @@ static func look_of(c: Dictionary, id: String = "", fallback_hair: String = "#c8
 		"eyes": Color.html(String(c.get("eyes", "#4a6a9a"))),
 		"outfit": Color.html(String(c.get("outfit", "#6a6a8a"))),
 		"accent": Color.html(String(c.get("accent", "#e0c080"))),
-		"outline": Color.html(String(c.get("outline", c.get("accent", "#e0c080")))),
 		"feature": String(c.get("feature", "")),
 	}
 
@@ -43,7 +46,7 @@ static func mascot_look(company: Dictionary, feature: String) -> Dictionary:
 	return {
 		"id": String(company.get("id", "")),
 		"hair": col.darkened(0.1), "eyes": col.darkened(0.45), "outfit": col.darkened(0.3),
-		"accent": col.lightened(0.45), "outline": col, "feature": feature,
+		"accent": col.lightened(0.45), "feature": feature,
 	}
 
 
@@ -54,8 +57,9 @@ const TOP_PAD := {"frown": 90.0}
 ## 主角的情绪 / 身体状态 → 整张立绘。身体优先于情绪；有图就不加占位用的叠加层。
 static func heroine_layers(mood: String, body: String) -> Dictionary:
 	var expr := _heroine_expr(mood, body)
-	if texture("heroine", expr) != null:
-		return {"expr": expr, "overlays": []}
+	var resolved := resolve_texture("heroine", expr, [])
+	if resolved.tex != null:
+		return {"expr": String(resolved.name), "overlays": []}
 	return _heroine_placeholder(mood, body)
 
 
@@ -130,7 +134,29 @@ static func mascot_layers(name: String) -> Dictionary:
 	return {"expr": "smile", "overlays": []}
 
 
-## 正式立绘：assets/portraits/<who>/<name>.png，没有返回 null。结果（包括没有）会缓存。
+static func ui_config() -> Dictionary:
+	if not _ui_loaded:
+		_ui_loaded = true
+		var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(UI_PATH))
+		_ui = raw if typeof(raw) == TYPE_DICTIONARY else {}
+	return _ui
+
+
+## data/ui.json 的 portrait_outline。true 时优先带描边的文件。
+static func wants_outline() -> bool:
+	return bool(ui_config().get("portrait_outline", false))
+
+
+## 同一个表情的两套文件名。outlined 为 true 时 _outline 排在前面。
+static func variant_stems(expr: String, outlined: bool) -> PackedStringArray:
+	var plain := expr
+	var lined := "%s_outline" % expr
+	if outlined:
+		return PackedStringArray([lined, plain])
+	return PackedStringArray([plain, lined])
+
+
+## 正式立绘：assets/portraits/<who>/<name>.png，没有返回 null。name 可以已经带 _outline。结果会缓存。
 static func texture(who: String, name: String) -> Texture2D:
 	var path := "%s/%s/%s.png" % [PORTRAIT_DIR, who, name]
 	if not _textures.has(path):
@@ -145,8 +171,14 @@ static func base_texture(who: String, expr: String, overlays: Array = []) -> Tex
 
 
 static func resolve_texture(who: String, expr: String, overlays: Array = []) -> Dictionary:
+	return resolve_prefer(who, expr, overlays, wants_outline())
+
+
+## outlined 显式指定要不要描边版，测试用。游戏里走 resolve_texture。
+## 返回 name 是表情名（frown，不是 frown_outline），file 是实际加载的文件名。
+static func resolve_prefer(who: String, expr: String, overlays: Array, outlined: bool) -> Dictionary:
 	if who == "":
-		return {"tex": null, "name": ""}
+		return {"tex": null, "name": "", "file": ""}
 	var names: Array = []
 	if overlays.has("pajama") or expr == "hospital":
 		names.append("hospital")
@@ -160,10 +192,11 @@ static func resolve_texture(who: String, expr: String, overlays: Array = []) -> 
 		if seen.has(key):
 			continue
 		seen[key] = true
-		var tex := texture(who, key)
-		if tex:
-			return {"tex": tex, "name": key}
-	return {"tex": null, "name": ""}
+		for stem in variant_stems(key, outlined):
+			var tex := texture(who, stem)
+			if tex:
+				return {"tex": tex, "name": key, "file": stem}
+	return {"tex": null, "name": "", "file": ""}
 
 
 ## 在 r 里画一个角色。dim=true 时把角色本身压暗（不铺底色块）。
@@ -176,7 +209,8 @@ static func draw(ci: CanvasItem, r: Rect2, look: Dictionary, expr: String, overl
 	if base:
 		var prev_filter := ci.texture_filter
 		ci.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-		_draw_outlined(ci, r, base, float(TOP_PAD.get(String(resolved.name), 0.0)), look.get("outline", look.get("accent", Color.WHITE)))
+		ci.material = null
+		_draw_fitted(ci, r, base, float(TOP_PAD.get(String(resolved.name), 0.0)))
 		ci.texture_filter = prev_filter
 		return
 	ci.material = null
@@ -267,44 +301,6 @@ static func _apply_modulate(ci: CanvasItem, dim: bool, tint: Color) -> void:
 	if tint.a > 0.001:
 		m = m.lerp(Color(tint.r, tint.g, tint.b, 1.0), clampf(tint.a, 0.0, 0.75))
 	ci.modulate = m
-
-
-## 1080p 高的画面上大约 3 像素。项目视口是 720 高，会按比例变细，各处一样粗。
-static func outline_radius(ci: CanvasItem) -> float:
-	var h := 720.0
-	if ci is Control:
-		var vp := (ci as Control).get_viewport_rect().size.y
-		if vp > 1.0:
-			h = vp
-	return 3.0 * h / 1080.0
-
-
-static func _outline_mat(ci: CanvasItem) -> ShaderMaterial:
-	if ci.has_meta(&"outline_mat"):
-		return ci.get_meta(&"outline_mat")
-	var m := ShaderMaterial.new()
-	m.shader = OUTLINE_SHADER
-	ci.set_meta(&"outline_mat", m)
-	return m
-
-
-## 描边画在角色外侧。底边是裁切线，不留空，shader 也不会沿那条边描。
-static func _draw_outlined(ci: CanvasItem, r: Rect2, tex: Texture2D, top_pad: float, outline: Color) -> void:
-	var ts := tex.get_size()
-	var pad := clampf(top_pad, 0.0, ts.y * 0.25)
-	var usable_h := ts.y - pad
-	var scale := maxf(r.size.x / ts.x, r.size.y / usable_h)
-	var src_size := Vector2(minf(r.size.x / scale, ts.x), minf(r.size.y / scale, usable_h))
-	var origin := Vector2((ts.x - src_size.x) * 0.5, pad)
-	var radius := outline_radius(ci)
-	var dest := Rect2(r.position - Vector2(radius, radius), r.size + Vector2(radius * 2.0, radius))
-	var mat := _outline_mat(ci)
-	mat.set_shader_parameter("outline_color", outline)
-	mat.set_shader_parameter("radius_px", radius)
-	mat.set_shader_parameter("dest_size", dest.size)
-	mat.set_shader_parameter("src_uv", Vector4(origin.x / ts.x, origin.y / ts.y, src_size.x / ts.x, src_size.y / ts.y))
-	ci.material = mat
-	ci.draw_texture_rect_region(tex, dest, Rect2(origin, src_size))
 
 
 ## 把立绘铺满 r：等比放大到盖住整个框，水平居中。top_pad 是这张图顶部多出来的空白，
