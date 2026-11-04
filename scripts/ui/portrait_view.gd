@@ -1,8 +1,7 @@
 extends Control
-## 可复用的立绘框：浅天蓝方格背景 + 占位立绘 + 木框。用在对话、晨报、预测弹窗、日结算和结局画面。
+## 可复用的立绘：只画抠好的角色（带描边），底下是什么界面就透出什么。
 ## who 为 characters.json 里的角色 id，或公司 id（看板娘）。follow_state=true 时主角跟随当前情绪与身体状态。
 
-const UI := preload("res://scripts/ui/ui_style.gd")
 const Painter := preload("res://scripts/ui/portrait_painter.gd")
 
 @export var who := "heroine"
@@ -45,17 +44,12 @@ func look() -> Dictionary:
 
 
 func _draw() -> void:
-	var r := Rect2(Vector2.ZERO, size)
-	UI.draw_portrait_backdrop(self, r.grow(-3), tint)
 	var e := expr
 	var o := overlays
 	if follow_state and who == "heroine":
 		var layers := Painter.heroine_layers(String(GameState.player.get("mood", "calm")), String(GameState.player.get("body", "healthy")))
 		e = layers.expr
 		o = layers.overlays
-	var inner := r.grow(-6)
-	inner.position.y += 6
-	inner.size.y -= 3
-	Painter.draw(self, inner, look(), e, o, dim)
-	if show_frame:
-		UI.draw_portrait_frame(self, r)
+	# 留出描边的空隙，角色仍顶对齐。不再铺方格底，也不画木框。
+	var inner := Rect2(Vector2.ZERO, size).grow(-2)
+	Painter.draw(self, inner, look(), e, o, dim, tint)

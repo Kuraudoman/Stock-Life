@@ -17,3 +17,5 @@
 - cold.png      感冒
 - dizzy.png     发烧
 - hospital.png  住院
+- cry.png       对话里的哭（失败）
+- ecstatic.png  结局里的高兴

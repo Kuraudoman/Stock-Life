@@ -1,14 +1,15 @@
 extends Control
-## 主角状态立绘（占位版，GDD 第 9 节）：表情反映情绪，外观反映身体状态，旁边是状态标签与体力 / 压力。
-## assets/portraits/heroine/ 里有正式立绘时自动换成图片（见 portrait_painter.gd）。点击发起走势预测。
+## 主角状态立绘：表情反映情绪，外观反映身体状态，旁边是状态标签与体力 / 压力。
+## 角色本身由 portrait_view 画（描边、无底框）。点击发起走势预测。
 
 signal portrait_clicked
 
 const UI := preload("res://scripts/ui/ui_style.gd")
-const Painter := preload("res://scripts/ui/portrait_painter.gd")
 const Life := preload("res://scripts/core/life.gd")
+const PortraitView := preload("res://scripts/ui/portrait_view.gd")
 
 var _hover := false
+var _portrait: Control
 
 
 func _ready() -> void:
@@ -18,6 +19,12 @@ func _ready() -> void:
 	EventBus.day_started.connect(func(_d): _refresh())
 	EventBus.market_closed.connect(func(_s): _refresh())
 	EventBus.player_changed.connect(_refresh)
+	_portrait = PortraitView.new()
+	_portrait.follow_state = true
+	_portrait.who = "heroine"
+	_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_portrait.z_index = -1
+	add_child(_portrait)
 	_refresh()
 
 
@@ -36,6 +43,7 @@ func _gui_input(event: InputEvent) -> void:
 func _notification(what: int) -> void:
 	match what:
 		NOTIFICATION_RESIZED:
+			_layout_portrait()
 			queue_redraw()
 		NOTIFICATION_MOUSE_ENTER:
 			_hover = true
@@ -53,15 +61,7 @@ func _draw() -> void:
 	var mood := String(p.get("mood", "calm"))
 	var body := String(p.get("body", "healthy"))
 	var mc: Color = UI.MOOD_COLORS.get(mood, UI.MOOD_COLORS.calm)
-	# 立绘框
-	var frame := Rect2(0, 0, minf(size.x * 0.5, 150.0), size.y)
-	UI.draw_portrait_backdrop(self, frame.grow(-3), Color(1, 1, 1, 0.25) if _hover else Color(0, 0, 0, 0))
-	var layers := Painter.heroine_layers(mood, body)
-	var inner := frame.grow(-6)
-	inner.position.y += 6
-	inner.size.y -= 3
-	Painter.draw(self, inner, Painter.look_of(GameState.character("heroine"), "heroine"), layers.expr, layers.overlays)
-	UI.draw_portrait_frame(self, frame)
+	var frame := _layout_portrait()
 
 	# 右侧文字
 	var bold := get_theme_font("font", "RibbonLabel")
@@ -87,6 +87,14 @@ func _draw() -> void:
 				HORIZONTAL_ALIGNMENT_LEFT, w, 12, UI.MUTED)
 	draw_string(bold, Vector2(x, size.y - 8), "▶ 点我预测走势", HORIZONTAL_ALIGNMENT_LEFT, w, 13,
 			UI.ACCENT.lightened(0.15) if _hover else UI.ACCENT)
+
+
+func _layout_portrait() -> Rect2:
+	var frame := Rect2(0, 0, minf(size.x * 0.5, 150.0), size.y)
+	if _portrait:
+		_portrait.position = frame.position
+		_portrait.size = frame.size
+	return frame
 
 
 func _draw_bar(font: Font, pos: Vector2, w: float, label: String, v: float, color: Color) -> void:

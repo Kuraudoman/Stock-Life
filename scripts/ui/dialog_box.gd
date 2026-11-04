@@ -85,8 +85,8 @@ func _show(i: int) -> void:
 	next_button.visible = true
 
 
-## 主角对话表情。这套立绘里没有的名字（目前是 cry）退回 smile，不再画占位道具。
-const HEROINE_ART := ["smile", "grin", "frown", "coin", "panic", "sleepy", "cold", "dizzy", "hospital"]
+## 主角对话表情。不在这套立绘里的名字退回 smile。
+const HEROINE_ART := ["smile", "grin", "frown", "coin", "panic", "sleepy", "cold", "dizzy", "hospital", "cry", "ecstatic"]
 
 
 func _heroine_layers(expr: String) -> Dictionary:

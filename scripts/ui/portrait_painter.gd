@@ -7,6 +7,7 @@ extends RefCounted
 ## 缺某个表情时退回 smile / normal，整个目录都没有图时退回占位画法。
 
 const UI := preload("res://scripts/ui/ui_style.gd")
+const OUTLINE_SHADER := preload("res://assets/shaders/portrait_outline.gdshader")
 
 const PORTRAIT_DIR := "res://assets/portraits"
 ## 缺表情时依次尝试的默认表情。
@@ -31,6 +32,7 @@ static func look_of(c: Dictionary, id: String = "", fallback_hair: String = "#c8
 		"eyes": Color.html(String(c.get("eyes", "#4a6a9a"))),
 		"outfit": Color.html(String(c.get("outfit", "#6a6a8a"))),
 		"accent": Color.html(String(c.get("accent", "#e0c080"))),
+		"outline": Color.html(String(c.get("outline", c.get("accent", "#e0c080")))),
 		"feature": String(c.get("feature", "")),
 	}
 
@@ -41,7 +43,7 @@ static func mascot_look(company: Dictionary, feature: String) -> Dictionary:
 	return {
 		"id": String(company.get("id", "")),
 		"hair": col.darkened(0.1), "eyes": col.darkened(0.45), "outfit": col.darkened(0.3),
-		"accent": col.lightened(0.45), "feature": feature,
+		"accent": col.lightened(0.45), "outline": col, "feature": feature,
 	}
 
 
@@ -164,27 +166,20 @@ static func resolve_texture(who: String, expr: String, overlays: Array = []) -> 
 	return {"tex": null, "name": ""}
 
 
-## 在 r 里画一个角色。dim=true 时整体变暗（对话里不在说话的一方）。
-static func draw(ci: CanvasItem, r: Rect2, look: Dictionary, expr: String, overlays: Array = [], dim: bool = false) -> void:
+## 在 r 里画一个角色。dim=true 时把角色本身压暗（不铺底色块）。
+## tint 是看板娘涨跌的色调，乘在角色上，不再画在背景上。
+static func draw(ci: CanvasItem, r: Rect2, look: Dictionary, expr: String, overlays: Array = [], dim: bool = false, tint: Color = Color(0, 0, 0, 0)) -> void:
+	_apply_modulate(ci, dim, tint)
 	var who := String(look.get("id", ""))
 	var resolved := resolve_texture(who, expr, overlays)
 	var base: Texture2D = resolved.tex
 	if base:
-		# 项目默认是像素风的最近邻过滤。高清立绘只在画这一张时改成线性 + mipmap，
-		# 画完改回去，木框贴图仍然是最近邻。
 		var prev_filter := ci.texture_filter
 		ci.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-		_draw_fitted(ci, r, base, float(TOP_PAD.get(String(resolved.name), 0.0)))
-		# 主角这套是整张图，道具已经画在里面。别的角色还可以用 fx_ 叠加。
-		if who != "heroine":
-			for o in overlays:
-				var fx := texture(who, "fx_" + String(o))
-				if fx:
-					_draw_fitted(ci, r, fx)
+		_draw_outlined(ci, r, base, float(TOP_PAD.get(String(resolved.name), 0.0)), look.get("outline", look.get("accent", Color.WHITE)))
 		ci.texture_filter = prev_filter
-		if dim:
-			ci.draw_rect(r, Color(UI.PORTRAIT_BG, 0.45), true)
 		return
+	ci.material = null
 	var R :=minf(r.size.x * 0.27, r.size.y * 0.2)
 	var c := Vector2(r.position.x + r.size.x * 0.5, r.position.y + r.size.y * 0.42)
 	var hair: Color = look.hair
@@ -264,8 +259,52 @@ static func draw(ci: CanvasItem, r: Rect2, look: Dictionary, expr: String, overl
 	# 身体状态叠加层
 	for o in overlays:
 		_overlay(ci, c, R, r, look, String(o))
+## 不说话时压暗角色本身。看板娘的涨跌色调也乘在角色上，不再铺一块底。
+static func _apply_modulate(ci: CanvasItem, dim: bool, tint: Color) -> void:
+	var m := Color.WHITE
 	if dim:
-		ci.draw_rect(r, Color(UI.PORTRAIT_BG, 0.45), true)
+		m = Color(0.62, 0.64, 0.7, 0.88)
+	if tint.a > 0.001:
+		m = m.lerp(Color(tint.r, tint.g, tint.b, 1.0), clampf(tint.a, 0.0, 0.75))
+	ci.modulate = m
+
+
+## 1080p 高的画面上大约 3 像素。项目视口是 720 高，会按比例变细，各处一样粗。
+static func outline_radius(ci: CanvasItem) -> float:
+	var h := 720.0
+	if ci is Control:
+		var vp := (ci as Control).get_viewport_rect().size.y
+		if vp > 1.0:
+			h = vp
+	return 3.0 * h / 1080.0
+
+
+static func _outline_mat(ci: CanvasItem) -> ShaderMaterial:
+	if ci.has_meta(&"outline_mat"):
+		return ci.get_meta(&"outline_mat")
+	var m := ShaderMaterial.new()
+	m.shader = OUTLINE_SHADER
+	ci.set_meta(&"outline_mat", m)
+	return m
+
+
+## 描边画在角色外侧。底边是裁切线，不留空，shader 也不会沿那条边描。
+static func _draw_outlined(ci: CanvasItem, r: Rect2, tex: Texture2D, top_pad: float, outline: Color) -> void:
+	var ts := tex.get_size()
+	var pad := clampf(top_pad, 0.0, ts.y * 0.25)
+	var usable_h := ts.y - pad
+	var scale := maxf(r.size.x / ts.x, r.size.y / usable_h)
+	var src_size := Vector2(minf(r.size.x / scale, ts.x), minf(r.size.y / scale, usable_h))
+	var origin := Vector2((ts.x - src_size.x) * 0.5, pad)
+	var radius := outline_radius(ci)
+	var dest := Rect2(r.position - Vector2(radius, radius), r.size + Vector2(radius * 2.0, radius))
+	var mat := _outline_mat(ci)
+	mat.set_shader_parameter("outline_color", outline)
+	mat.set_shader_parameter("radius_px", radius)
+	mat.set_shader_parameter("dest_size", dest.size)
+	mat.set_shader_parameter("src_uv", Vector4(origin.x / ts.x, origin.y / ts.y, src_size.x / ts.x, src_size.y / ts.y))
+	ci.material = mat
+	ci.draw_texture_rect_region(tex, dest, Rect2(origin, src_size))
 
 
 ## 把立绘铺满 r：等比放大到盖住整个框，水平居中。top_pad 是这张图顶部多出来的空白，

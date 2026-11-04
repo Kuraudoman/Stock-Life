@@ -24,6 +24,8 @@ func _initialize() -> void:
 	await _shot_city("heroine-city-fever")
 	_set_state(gs, "calm", "healthy")
 	await _shot_paper("heroine-paper-calm")
+	await _shot_closeup("heroine-outline-closeup")
+	await _shot_ending("heroine-ending-ecstatic")
 	quit()
 
 
@@ -83,6 +85,43 @@ func _shot_paper(name: String) -> void:
 		await process_frame
 	_save(name)
 	p.queue_free()
+	await process_frame
+
+
+func _shot_closeup(name: String) -> void:
+	var bg := ColorRect.new()
+	bg.color = Color(1.0, 0.97, 0.9)
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.offset_right = 1280
+	bg.offset_bottom = 720
+	root.add_child(bg)
+	var pv = load("res://scripts/ui/portrait_view.gd").new()
+	pv.who = "heroine"
+	pv.expr = "smile"
+	pv.custom_minimum_size = Vector2(460, 620)
+	pv.position = Vector2(410, 40)
+	pv.size = Vector2(460, 620)
+	root.add_child(pv)
+	for _i in 4:
+		await process_frame
+	_save(name)
+	pv.queue_free()
+	bg.queue_free()
+	await process_frame
+
+
+func _shot_ending(name: String) -> void:
+	var c = load("res://scenes/ui/chapter_end.tscn").instantiate()
+	c.setup({
+		"success": true, "early": true, "day": 12, "date": "4月12日",
+		"cash": 52000, "debt": 0, "net_worth": 52000, "realized": 12000, "fees": 180,
+		"pred_made": 8, "pred_resolved": 6, "pred_hits": 4, "affection": 20,
+	})
+	root.add_child(c)
+	for _i in 4:
+		await process_frame
+	_save(name)
+	c.queue_free()
 	await process_frame
 
 
