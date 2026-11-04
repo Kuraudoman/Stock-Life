@@ -105,7 +105,7 @@ godot --headless --path . --script res://tools/build_ui_assets.gd -- --pack "../
 
 晚间城区的背景是作者为本项目生成的 AI 插画（奥术蒸汽朋克，16:9），放在 `assets/backgrounds/city/`，说明见同目录的 `SOURCE.txt`。路径写在 `data/evening.json` 的 `background` 里，不写死在代码里。住所可以按等级换图：阁楼用 `home_attic.jpg`，以后的公寓、宅邸、浮空庄园只要在住房条目上加 `background`，没有就继续用阁楼那张。这些图会缩小显示，导入时带 mipmap，地图和侧栏单独用线性过滤，不跟着界面的最近邻走。
 
-主角希雅的半身立绘也是同一套 AI 流程，放在 `assets/portraits/heroine/`（见 `SOURCE.txt`）。白底用 `tools/cutout_portraits.py` 从边缘抠掉。身体状态优先于情绪：住院、发烧、感冒、疲劳各用一张整图，健康时才按平静 / 乐观 / 悲观 / 狂热 / 恐慌换。对话的 `cry` 和结局的 `ecstatic` 也有整图。立绘不再带方格底和木框，角色外侧有一圈描边，颜色写在 `characters.json` 的 `outline`。别的角色没有图时仍用代码画的占位立绘，占位图没有描边。
+主角希雅的半身立绘也是同一套 AI 流程，放在 `assets/portraits/heroine/`（见 `SOURCE.txt`）。白底用 `tools/cutout_portraits.py` 抠掉：先用 rembg 的 isnet-anime 得到轮廓，再去掉发丝线稿围住的近白。衬衫、袖口、口罩、毯子和枕头留着。身体状态优先于情绪：住院、发烧、感冒、疲劳各用一张整图，健康时才按平静 / 乐观 / 悲观 / 狂热 / 恐慌换。对话的 `cry` 和结局的 `ecstatic` 也有整图。立绘不再带方格底和木框，角色外侧有一圈描边，颜色写在 `characters.json` 的 `outline`。别的角色没有图时仍用代码画的占位立绘，占位图没有描边。
 
 ## 存档
 
@@ -183,7 +183,7 @@ stock-life/
 │   ├── build_ui_assets.gd    # 从 Kenney UI Pack 生成界面贴图
 │   ├── simulate.gd           # 批量行情模拟与第一章策略对比
 │   ├── shot_evening.gd       # 把晚间城市地图画成 PNG（需要显示，不能用 --headless）
-│   └── cutout_portraits.py   # 从立绘边缘抠掉近白背景
+│   └── cutout_portraits.py   # 用 isnet-anime 抠立绘，并清掉发缝里的白底
 └── docs/GDD.md               # 设计文档
 ```
 
