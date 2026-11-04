@@ -1,4 +1,0 @@
-{
-	"_comment": "界面开关。portrait_outline 为 true 时，立绘优先用 <表情>_outline.png（画好描边的那一套）；缺文件就退回不带描边的 <表情>.png，再退回 smile / normal，最后才用代码画的占位。当前仓库里的希雅图是不带描边的一套，所以这里先关着。",
-	"portrait_outline": false
-}

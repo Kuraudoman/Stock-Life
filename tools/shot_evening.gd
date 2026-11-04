@@ -34,6 +34,10 @@ func _initialize() -> void:
 	map.open_card("downtown")
 	await create_timer(0.25).timeout
 	_save("city-map-modal-downtown")
+	map.enter_district("harbor")
+	for _i in 4:
+		await process_frame
+	_save("city-map-district-harbor")
 	map.queue_free()
 	await process_frame
 	var dialog = load("res://scenes/dialog.tscn").instantiate()
@@ -41,6 +45,25 @@ func _initialize() -> void:
 	root.add_child(dialog)
 	await create_timer(0.45).timeout
 	_save("heroine-dialog-calm")
+	dialog.queue_free()
+	await process_frame
+	var bg := ColorRect.new()
+	bg.color = Color(0.55, 0.18, 0.45)
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.offset_right = 1280
+	bg.offset_bottom = 720
+	root.add_child(bg)
+	var Portrait := load("res://scripts/ui/portrait_view.gd")
+	for i in 2:
+		var pv = Portrait.new()
+		pv.who = "heroine"
+		pv.expr = "smile" if i == 0 else "frown"
+		pv.position = Vector2(80 + i * 600, 30)
+		pv.size = Vector2(520, 660)
+		root.add_child(pv)
+	for _i in 4:
+		await process_frame
+	_save("heroine-smile-frown")
 	quit()
 
 

@@ -70,7 +70,6 @@ Windows 上把 `godot` 换成 `Godot_v4.7.2-stable_win64_console.exe` 的路径�
 | `data/events.json` | 新闻事件：财报、利率决议、事件池、传闻、花边新闻；每条的冲击幅度、前兆文字、出现权重 |
 | `data/characters.json` | 角色名字与占位立绘配色、看板娘头饰 |
 | `data/evening.json` | 晚间：行动点、城区、行动、住所 / 交通 / 服装、名声与进修的数值和文案 |
-| `data/ui.json` | 界面开关。`portrait_outline` 决定立绘用带描边的文件还是不带的 |
 | `data/city_map.json` | 鸟瞰大地图的多边形（0..1），键和 `evening.json` 的城区 id 一致。原图上的 industrial、lower_town 分别记成 industry、downtown |
 | `data/dialogues/tutorial.json` | 开场剧情、教学、结局对话 |
 | `data/dialogues/noelle.json` | 诺艾尔的点评、状态提醒、复盘分析句式 |
@@ -107,7 +106,7 @@ godot --headless --path . --script res://tools/build_ui_assets.gd -- --pack "../
 
 晚间先看到一张鸟瞰全城的大地图（`assets/backgrounds/city/overview.png`，多边形在 `data/city_map.json`）。点进某个城区后，背景换成该区自己的场景图。这些都是作者为本项目生成的 AI 插画（奥术蒸汽朋克），说明见 `assets/backgrounds/city/SOURCE.txt`。场景图路径写在 `data/evening.json` 的 `background` 里，不写死在代码里。住所可以按等级换图：阁楼用 `home_attic.jpg`，以后的公寓、宅邸、浮空庄园只要在住房条目上加 `background`，没有就继续用阁楼那张。这些图会缩小显示，导入时带 mipmap，地图和场景单独用线性过滤，不跟着界面的最近邻走。
 
-主角希雅的半身立绘放在 `assets/portraits/heroine/`（文件名和描边开关见 `assets/portraits/README.md`）。现在仓库里的是不带描边的一套；带描边的图命名为 `<表情>_outline.png`，由 `data/ui.json` 的 `portrait_outline` 切换。缺文件会退回另一套，再退回 smile。身体状态优先于情绪：住院、发烧、感冒、疲劳各用一张整图，健康时才按平静 / 乐观 / 悲观 / 狂热 / 恐慌换。对话的 `cry` 和结局的 `ecstatic` 也有整图。立绘不再带方格底和木框，代码也不再画描边。别的角色没有图时仍用代码画的占位立绘。
+主角希雅的半身立绘放在 `assets/portraits/heroine/`（透明 PNG，1088×1440，见 `assets/portraits/README.md`）。文件名就是表情名，例如 `smile.png`。缺某张时退回 `smile`，再没有才用代码画的占位。身体状态优先于情绪：住院、发烧、感冒、疲劳各用一张整图，健康时才按平静 / 乐观 / 悲观 / 狂热 / 恐慌换。对话的 `cry` 和结局的 `ecstatic` 也有整图。立绘不再带方格底和木框，也不描边。别的角色没有图时仍用代码画的占位立绘。
 
 ## 存档
 

@@ -1,5 +1,5 @@
 extends Control
-## 可复用的立绘：只画抠好的角色（带描边），底下是什么界面就透出什么。
+## 可复用的立绘：只画抠好的角色，底下是什么界面就透出什么。
 ## who 为 characters.json 里的角色 id，或公司 id（看板娘）。follow_state=true 时主角跟随当前情绪与身体状态。
 
 const Painter := preload("res://scripts/ui/portrait_painter.gd")
@@ -50,6 +50,6 @@ func _draw() -> void:
 		var layers := Painter.heroine_layers(String(GameState.player.get("mood", "calm")), String(GameState.player.get("body", "healthy")))
 		e = layers.expr
 		o = layers.overlays
-	# 留出描边的空隙，角色仍顶对齐。不再铺方格底，也不画木框。
-	var inner := Rect2(Vector2.ZERO, size).grow(-2)
+	# 角色顶对齐，铺满这块控件的高度。不再铺方格底，也不画木框。
+	var inner := Rect2(Vector2.ZERO, size)
 	Painter.draw(self, inner, look(), e, o, dim, tint)

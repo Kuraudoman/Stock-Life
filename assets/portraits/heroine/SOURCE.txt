@@ -1,20 +1,15 @@
 主角希雅的半身立绘
 
-这些图是本项目作者为 Stock-Life 生成的 AI 立绘，和城区背景用的是同一套做法，
-随仓库一起分发。文件名、尺寸和描边开关见上一级的 README.md。
+这些图由作者自己抠好透明背景后放进仓库，尺寸 1088×1440。
+文件名和用法见上一级的 README.md。
 
-当前这 11 张是不带描边的一套（smile.png 这种名字）。带描边的同名图写成
-smile_outline.png，由 data/ui.json 的 portrait_outline 切换。
-
-tools/cutout_portraits.py 只是可选的抠图脚本，不是这些文件的来源。
+tools/cutout_portraits.py 是旧的可选抠图脚本，不是这些文件的来源。
 
 不是像素素材。导入时生成 mipmap，绘制时单独用线性过滤。
 
-文件和状态：
-
 - smile.png     平静
 - grin.png      乐观
-- frown.png     悲观（人物比其他几张低一截，绘制时用代码把顶部空白让掉）
+- frown.png     悲观
 - coin.png      狂热
 - panic.png     恐慌
 - sleepy.png    疲劳

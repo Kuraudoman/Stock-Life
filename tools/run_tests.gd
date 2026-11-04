@@ -660,28 +660,18 @@ func _test_heroine_portraits() -> void:
 			check(name == String(expect[body][mood]) and (layers.overlays as Array).is_empty(),
 					"%s / %s → %s，不再叠占位道具" % [mood, body, name])
 			var tex := Painter.base_texture("heroine", name, layers.overlays)
-			check(tex != null and tex.get_width() == 864 and tex.get_height() == 1152,
+			check(tex != null and tex.get_width() == 1088 and tex.get_height() == 1440,
 					"%s.png 能加载" % name)
 	var cry := Painter.texture("heroine", "cry")
 	var ecstatic := Painter.texture("heroine", "ecstatic")
-	check(cry != null and cry.get_width() == 864 and Painter.base_texture("heroine", "cry", []) == cry, "对话里的 cry 用 cry.png")
+	check(cry != null and cry.get_width() == 1088 and Painter.base_texture("heroine", "cry", []) == cry, "对话里的 cry 用 cry.png")
 	check(ecstatic != null and Painter.base_texture("heroine", "ecstatic", ["sparkle", "v_sign"]) == ecstatic, "结局的 ecstatic 用 ecstatic.png")
 	check(Painter.base_texture("heroine", "smile", ["blanket", "mask"]) == Painter.texture("heroine", "cold"),
 			"感冒的整图排在表情名前面")
-	var chars: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/characters.json")).characters
-	check(not chars.heroine.has("outline"), "角色数据里不再写代码描边")
-	check(Painter.wants_outline() == false, "现在默认显示不带描边的立绘")
-	var plain: PackedStringArray = Painter.variant_stems("panic", false)
-	var lined: PackedStringArray = Painter.variant_stems("panic", true)
-	check(String(plain[0]) == "panic" and String(plain[1]) == "panic_outline", "关描边时先找不带描边的文件")
-	check(String(lined[0]) == "panic_outline" and String(lined[1]) == "panic", "开描边时先找 _outline")
-	var prefer: Dictionary = Painter.resolve_prefer("heroine", "coin", [], true)
-	check(prefer.tex == Painter.texture("heroine", "coin") and String(prefer.file) == "coin" and String(prefer.name) == "coin",
-			"没有描边版时退回同一表情的无描边图")
-	var missing: Dictionary = Painter.resolve_prefer("heroine", "no_such_expr", [], true)
-	check(missing.tex == Painter.texture("heroine", "smile") and String(missing.name) == "smile" and String(missing.file) == "smile",
-			"表情两套都没有时退回 smile")
-	var gone: Dictionary = Painter.resolve_prefer("no_such_person", "smile", [], false)
+	var missing: Dictionary = Painter.resolve_texture("heroine", "no_such_expr", [])
+	check(missing.tex == Painter.texture("heroine", "smile") and String(missing.name) == "smile",
+			"没有这张表情时退回 smile")
+	var gone: Dictionary = Painter.resolve_texture("no_such_person", "smile", [])
 	check(gone.tex == null and String(gone.name) == "", "两套都没有就交给占位立绘")
 
 

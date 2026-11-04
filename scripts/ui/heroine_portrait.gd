@@ -1,6 +1,6 @@
 extends Control
 ## 主角状态立绘：表情反映情绪，外观反映身体状态，旁边是状态标签与体力 / 压力。
-## 角色本身由 portrait_view 画（描边、无底框）。点击发起走势预测。
+## 角色本身由 portrait_view 画，没有底框。点击发起走势预测。
 
 signal portrait_clicked
 

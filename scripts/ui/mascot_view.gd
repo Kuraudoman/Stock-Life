@@ -46,7 +46,7 @@ func _draw() -> void:
 		wash = Color(0.45, 0.45, 0.48, 0.55)
 	pv.tint = wash
 	pv.set_character(id, layers.expr, layers.overlays, false)
-	# look 由 portrait_view 按公司 id 取，描边用公司主题色。
+	# look 由 portrait_view 按公司 id 取。
 	pv.queue_redraw()
 	draw_string(font, Vector2(frame.end.x + 12.0, 20), "看板娘", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, UI.MUTED)
 	# 文字

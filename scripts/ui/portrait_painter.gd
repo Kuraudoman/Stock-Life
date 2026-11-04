@@ -1,23 +1,17 @@
 extends RefCounted
 ## 立绘绘制：有正式立绘就画图，没有就按角色配色画 Q 版占位半身像（GDD 第 9 节“MVP 占位”）。
-## 正式立绘放在 assets/portraits/<角色 id 或公司 id>/ 下：
-##   <表情名>.png          不带描边
-##   <表情名>_outline.png  画好描边的同一张
-## 用哪一套由 data/ui.json 的 portrait_outline 决定。选中的那张没有，就换另一套，
-## 再退回 smile / normal，整个目录都没有图时退回占位画法。
+## 正式立绘放在 assets/portraits/<角色 id 或公司 id>/ 下，文件名是 <表情名>.png。
+## 没有对应表情时退回 smile / normal，整个目录都没有图时退回占位画法。
 ## 主角按身体优先：hospital / dizzy / cold / sleepy，否则按情绪 smile / grin / frown / coin / panic。
 ## 整张图已经包含道具，不再叠 fx_。fx_<叠加层>.png 只给占位画法用。
 
 const UI := preload("res://scripts/ui/ui_style.gd")
 
 const PORTRAIT_DIR := "res://assets/portraits"
-const UI_PATH := "res://data/ui.json"
 ## 缺表情时依次尝试的默认表情。
 const DEFAULT_EXPRS := ["smile", "normal"]
 
 static var _textures := {}
-static var _ui_loaded := false
-static var _ui: Dictionary = {}
 
 const SKIN := Color(1.0, 0.91, 0.83)
 const SKIN_SHADE := Color(0.93, 0.76, 0.66)
@@ -50,8 +44,6 @@ static func mascot_look(company: Dictionary, feature: String) -> Dictionary:
 	}
 
 
-## frown.png 的人物比其他几张低大约 90 像素，裁切时把这截空白让掉，头才对齐。
-const TOP_PAD := {"frown": 90.0}
 
 
 ## 主角的情绪 / 身体状态 → 整张立绘。身体优先于情绪；有图就不加占位用的叠加层。
@@ -134,29 +126,7 @@ static func mascot_layers(name: String) -> Dictionary:
 	return {"expr": "smile", "overlays": []}
 
 
-static func ui_config() -> Dictionary:
-	if not _ui_loaded:
-		_ui_loaded = true
-		var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(UI_PATH))
-		_ui = raw if typeof(raw) == TYPE_DICTIONARY else {}
-	return _ui
-
-
-## data/ui.json 的 portrait_outline。true 时优先带描边的文件。
-static func wants_outline() -> bool:
-	return bool(ui_config().get("portrait_outline", false))
-
-
-## 同一个表情的两套文件名。outlined 为 true 时 _outline 排在前面。
-static func variant_stems(expr: String, outlined: bool) -> PackedStringArray:
-	var plain := expr
-	var lined := "%s_outline" % expr
-	if outlined:
-		return PackedStringArray([lined, plain])
-	return PackedStringArray([plain, lined])
-
-
-## 正式立绘：assets/portraits/<who>/<name>.png，没有返回 null。name 可以已经带 _outline。结果会缓存。
+## 正式立绘：assets/portraits/<who>/<name>.png，没有返回 null。结果会缓存。
 static func texture(who: String, name: String) -> Texture2D:
 	var path := "%s/%s/%s.png" % [PORTRAIT_DIR, who, name]
 	if not _textures.has(path):
@@ -171,14 +141,8 @@ static func base_texture(who: String, expr: String, overlays: Array = []) -> Tex
 
 
 static func resolve_texture(who: String, expr: String, overlays: Array = []) -> Dictionary:
-	return resolve_prefer(who, expr, overlays, wants_outline())
-
-
-## outlined 显式指定要不要描边版，测试用。游戏里走 resolve_texture。
-## 返回 name 是表情名（frown，不是 frown_outline），file 是实际加载的文件名。
-static func resolve_prefer(who: String, expr: String, overlays: Array, outlined: bool) -> Dictionary:
 	if who == "":
-		return {"tex": null, "name": "", "file": ""}
+		return {"tex": null, "name": ""}
 	var names: Array = []
 	if overlays.has("pajama") or expr == "hospital":
 		names.append("hospital")
@@ -192,11 +156,10 @@ static func resolve_prefer(who: String, expr: String, overlays: Array, outlined:
 		if seen.has(key):
 			continue
 		seen[key] = true
-		for stem in variant_stems(key, outlined):
-			var tex := texture(who, stem)
-			if tex:
-				return {"tex": tex, "name": key, "file": stem}
-	return {"tex": null, "name": "", "file": ""}
+		var tex := texture(who, key)
+		if tex:
+			return {"tex": tex, "name": key}
+	return {"tex": null, "name": ""}
 
 
 ## 在 r 里画一个角色。dim=true 时把角色本身压暗（不铺底色块）。
@@ -210,7 +173,7 @@ static func draw(ci: CanvasItem, r: Rect2, look: Dictionary, expr: String, overl
 		var prev_filter := ci.texture_filter
 		ci.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		ci.material = null
-		_draw_fitted(ci, r, base, float(TOP_PAD.get(String(resolved.name), 0.0)))
+		_draw_fitted(ci, r, base)
 		ci.texture_filter = prev_filter
 		return
 	ci.material = null
@@ -303,16 +266,17 @@ static func _apply_modulate(ci: CanvasItem, dim: bool, tint: Color) -> void:
 	ci.modulate = m
 
 
-## 把立绘铺满 r：等比放大到盖住整个框，水平居中。top_pad 是这张图顶部多出来的空白，
-## 裁切从那里开始，头才和别的表情齐。多出来的部分裁掉。
-static func _draw_fitted(ci: CanvasItem, r: Rect2, tex: Texture2D, top_pad: float = 0.0) -> void:
+## 按高度放进 r，水平居中，不变形。槽比图窄时只裁左右，头顶和脚底都留着。
+static func _draw_fitted(ci: CanvasItem, r: Rect2, tex: Texture2D) -> void:
 	var ts := tex.get_size()
-	var pad := clampf(top_pad, 0.0, ts.y * 0.25)
-	var usable_h := ts.y - pad
-	var scale := maxf(r.size.x / ts.x, r.size.y / usable_h)
-	var src_size := Vector2(minf(r.size.x / scale, ts.x), minf(r.size.y / scale, usable_h))
-	var origin := Vector2((ts.x - src_size.x) * 0.5, pad)
-	ci.draw_texture_rect_region(tex, r, Rect2(origin, src_size))
+	if ts.x < 1.0 or ts.y < 1.0 or r.size.x < 1.0 or r.size.y < 1.0:
+		return
+	var scale := r.size.y / ts.y
+	var src_w := minf(r.size.x / scale, ts.x)
+	var origin := Vector2((ts.x - src_w) * 0.5, 0.0)
+	var dest_w := src_w * scale
+	var dest := Rect2(r.position.x + (r.size.x - dest_w) * 0.5, r.position.y, dest_w, r.size.y)
+	ci.draw_texture_rect_region(tex, dest, Rect2(origin, Vector2(src_w, ts.y)))
 
 
 static func _face(ci: CanvasItem, c: Vector2, R: float, look: Dictionary, expr: String) -> void:
