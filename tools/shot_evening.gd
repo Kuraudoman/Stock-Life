@@ -64,6 +64,29 @@ func _initialize() -> void:
 	for _i in 4:
 		await process_frame
 	_save("heroine-smile-frown")
+	for c in root.get_children():
+		if c == bg or c.name in ["GameState", "EventBus", "SaveManager"]:
+			continue
+		c.queue_free()
+	await process_frame
+	var exprs := ["smile", "grin", "frown", "coin", "panic", "sleepy", "cold", "dizzy", "hospital", "cry", "ecstatic"]
+	for i in exprs.size():
+		var cell: Control = Portrait.new()
+		cell.who = "heroine"
+		cell.expr = exprs[i]
+		var col := i % 4
+		var row := i / 4
+		cell.position = Vector2(col * 320, row * 240)
+		cell.size = Vector2(320, 240)
+		root.add_child(cell)
+		var label := Label.new() as Label
+		label.text = exprs[i]
+		label.position = cell.position + Vector2(8, 4)
+		label.add_theme_color_override("font_color", Color.WHITE)
+		root.add_child(label)
+	for _i in 4:
+		await process_frame
+	_save("heroine-grid")
 	quit()
 
 

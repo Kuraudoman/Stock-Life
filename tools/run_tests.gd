@@ -672,7 +672,10 @@ func _test_heroine_portraits() -> void:
 	check(missing.tex == Painter.texture("heroine", "smile") and String(missing.name) == "smile",
 			"没有这张表情时退回 smile")
 	var gone: Dictionary = Painter.resolve_texture("no_such_person", "smile", [])
-	check(gone.tex == null and String(gone.name) == "", "两套都没有就交给占位立绘")
+	check(gone.tex == null and String(gone.name) == "", "目录里没有图就交给占位立绘")
+	check(float(Painter.TOP_PAD.get("frown", 0)) == 124.0, "悲观往上让 124 像素，发带和 smile 齐")
+	check(float(Painter.TOP_PAD.get("sleepy", 0)) == 25.0, "疲劳往上让 25 像素")
+	check(not Painter.TOP_PAD.has("smile"), "平静不用下移")
 
 
 func _test_evening_flow() -> void:

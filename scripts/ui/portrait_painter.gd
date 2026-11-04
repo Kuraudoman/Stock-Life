@@ -10,6 +10,9 @@ const UI := preload("res://scripts/ui/ui_style.gd")
 const PORTRAIT_DIR := "res://assets/portraits"
 ## 缺表情时依次尝试的默认表情。
 const DEFAULT_EXPRS := ["smile", "normal"]
+## 原图像素。相对 smile 的发带上沿：frown 的雨云把发带压到 y=127（smile 是 3），
+## sleepy 的发带在 y=28。画的时候从这里开始，头才和 smile 齐。文件本身不动。
+const TOP_PAD := {"frown": 124.0, "sleepy": 25.0}
 
 static var _textures := {}
 
@@ -173,7 +176,7 @@ static func draw(ci: CanvasItem, r: Rect2, look: Dictionary, expr: String, overl
 		var prev_filter := ci.texture_filter
 		ci.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		ci.material = null
-		_draw_fitted(ci, r, base)
+		_draw_fitted(ci, r, base, float(TOP_PAD.get(String(resolved.name), 0.0)))
 		ci.texture_filter = prev_filter
 		return
 	ci.material = null
@@ -266,17 +269,22 @@ static func _apply_modulate(ci: CanvasItem, dim: bool, tint: Color) -> void:
 	ci.modulate = m
 
 
-## 按高度放进 r，水平居中，不变形。槽比图窄时只裁左右，头顶和脚底都留着。
-static func _draw_fitted(ci: CanvasItem, r: Rect2, tex: Texture2D) -> void:
+## 按整张图的高度定缩放（各表情一样大），水平居中。top_pad 是这张图头顶多出来的空白，
+## 从那里开始画，发带才和 smile 齐；多出来的云会被槽的上沿裁掉，不裁脸。
+## 槽比图窄时只裁左右。
+static func _draw_fitted(ci: CanvasItem, r: Rect2, tex: Texture2D, top_pad: float = 0.0) -> void:
 	var ts := tex.get_size()
 	if ts.x < 1.0 or ts.y < 1.0 or r.size.x < 1.0 or r.size.y < 1.0:
 		return
+	var pad := clampf(top_pad, 0.0, ts.y * 0.3)
 	var scale := r.size.y / ts.y
+	var src_h := ts.y - pad
 	var src_w := minf(r.size.x / scale, ts.x)
-	var origin := Vector2((ts.x - src_w) * 0.5, 0.0)
+	var origin := Vector2((ts.x - src_w) * 0.5, pad)
 	var dest_w := src_w * scale
-	var dest := Rect2(r.position.x + (r.size.x - dest_w) * 0.5, r.position.y, dest_w, r.size.y)
-	ci.draw_texture_rect_region(tex, dest, Rect2(origin, Vector2(src_w, ts.y)))
+	var dest_h := src_h * scale
+	var dest := Rect2(r.position.x + (r.size.x - dest_w) * 0.5, r.position.y, dest_w, dest_h)
+	ci.draw_texture_rect_region(tex, dest, Rect2(origin, Vector2(src_w, src_h)))
 
 
 static func _face(ci: CanvasItem, c: Vector2, R: float, look: Dictionary, expr: String) -> void:
