@@ -6,6 +6,10 @@
 不是 Kenney 的像素素材。项目默认是最近邻采样，这些插画在导入时生成 mipmap，
 绘制时单独用线性过滤，缩小后才不会起锯齿。
 
+大地图 overview.png 是 1920×1080 的放大版（由 1280×720 原图 LANCZOS 放大），
+铺满晚间主区域时比原图像素更从容。点选范围不写在图上，而在 data/city_map.json
+的多边形里（0..1，相对地图实际画出的矩形）。
+
 文件对应 data/evening.json 里的城区：
 
 - golden_avenue.jpg  金穗大道
@@ -15,3 +19,4 @@
 - academy.jpg        学院区
 - lower_town.jpg     下城
 - home_attic.jpg     住所的阁楼。住房条目上可以再写 background；没写的等级回退到城区自己的 background（目前就是这张阁楼）。
+- overview.png       晚间鸟瞰大地图，七个城区都在这一张上。

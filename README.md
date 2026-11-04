@@ -18,7 +18,7 @@ M2（v0.4–v0.6，「系统扩展」）有四块：晚间行动与属性、好�
 
 | M2 · 晚间 | 状态 | 说明 |
 |---|---|---|
-| 城市地图 | ✅ | 收盘后进入奥鲁姆城区（下城、住所、学院区、魔导工业区、金穗大道、港区、贵族区）。占位图是代码画的色块和房子，立绘仍是 `portrait_painter.gd` |
+| 城市地图 | ✅ | 收盘后是一张可点的鸟瞰大地图（下城、住所、学院区、魔导工业区、金穗大道、港区、贵族区）。移上去高亮，点开卡片再「前往」进该城区；住所在图上不好找，中心有一枚会轻轻闪的房子标记 |
 | 行动点 | ✅ | 工作日晚间 2 点，每个休市日 4 点；疲劳 −1；马车 / 魔导车最多再 +2。发烧只能休息，住院只能睡觉。什么都不做直接睡觉 = 旧版「早点休息」 |
 | 属性 | ✅ | 体力、压力沿用 M1。名声会随大赚、募捐、沙龙和换装上升。进修 0–100，满了预测正确率 +10%。悲观时压力升得更快，乐观时晚间社交好感多 1 |
 | 住所 / 交通 / 服装 | ✅ | 阁楼→公寓→宅邸→浮空庄园（每晚多恢复）；步行→马车→魔导车→私人飞龙（行动点最多 +2）；平民服→正装→贵族礼服（名声，礼服可进沙龙）。价格在 `data/evening.json`，第一章买得起前一两档 |
@@ -40,7 +40,7 @@ M2（v0.4–v0.6，「系统扩展」）有四块：晚间行动与属性、好�
 - 每天开盘前先读晨报。「要闻」已经反映在开盘价里；「市场」栏的风声才是前兆——真正的消息 1–5 个交易日后出现，但不会说是哪天。传闻真假参半。
 - 右下角「开盘」开始一天；空格键暂停 / 继续，「快进到收盘」直接跳到 15:00。盘中出快讯会自动暂停。
 - 点左上角的主角立绘请她预测走势。她的准确度取决于状态标签和脸色：平静健康时最靠谱，狂热、恐慌、生病时会离谱甚至说反，界面不显示准确率。每天最多 3 次，每次消耗体力。
-- 收盘后进入城市地图。工作日有 2 个行动点，周六、周日各有 4 个。早点休息、和诺艾尔复盘、去学院进修，或者回家睡觉。什么都不做直接睡觉，和早点休息一样。累了行动点变少，发烧就只能休息。
+- 收盘后进入城市大地图。鼠标移到城区上会亮，点一下看场景，再按「前往」进去做事。点暗处或按 Esc 退回大地图。工作日有 2 个行动点，周六、周日各有 4 个。早点休息、和诺艾尔复盘、去学院进修，或者回家睡觉。什么都不做直接睡觉，和早点休息一样。累了行动点变少，发烧就只能休息，住院只能睡觉。
 - 顶栏「还款」把现金还给黑鸦商会，还清 50,000 即通关。期限是 4 月 30 日收盘。名声、住所和进修写在顶栏「名声」的提示里，调查度这版不会涨。
 
 颜色约定：**红涨绿跌**。
@@ -70,6 +70,7 @@ Windows 上把 `godot` 换成 `Godot_v4.7.2-stable_win64_console.exe` 的路径�
 | `data/events.json` | 新闻事件：财报、利率决议、事件池、传闻、花边新闻；每条的冲击幅度、前兆文字、出现权重 |
 | `data/characters.json` | 角色名字与占位立绘配色、看板娘头饰 |
 | `data/evening.json` | 晚间：行动点、城区、行动、住所 / 交通 / 服装、名声与进修的数值和文案 |
+| `data/city_map.json` | 鸟瞰大地图的多边形（0..1），键和 `evening.json` 的城区 id 一致。原图上的 industrial、lower_town 分别记成 industry、downtown |
 | `data/dialogues/tutorial.json` | 开场剧情、教学、结局对话 |
 | `data/dialogues/noelle.json` | 诺艾尔的点评、状态提醒、复盘分析句式 |
 | `data/dialogues/heroine.json` | 主角的预测台词（按情绪和结果分组） |
@@ -103,7 +104,7 @@ godot --headless --path . --script res://tools/build_ui_assets.gd -- --pack "../
 
 代码里用到的颜色集中在 `scripts/ui/ui_style.gd`。主题里的变体：`FeaturePanel`（带金属包角的重点面板）、`RibbonLabel` / `RibbonTitle`（红色缎带标题）、`BuyButton` / `SellButton`、`StockRow`。
 
-晚间城区的背景是作者为本项目生成的 AI 插画（奥术蒸汽朋克，16:9），放在 `assets/backgrounds/city/`，说明见同目录的 `SOURCE.txt`。路径写在 `data/evening.json` 的 `background` 里，不写死在代码里。住所可以按等级换图：阁楼用 `home_attic.jpg`，以后的公寓、宅邸、浮空庄园只要在住房条目上加 `background`，没有就继续用阁楼那张。这些图会缩小显示，导入时带 mipmap，地图和侧栏单独用线性过滤，不跟着界面的最近邻走。
+晚间先看到一张鸟瞰全城的大地图（`assets/backgrounds/city/overview.png`，多边形在 `data/city_map.json`）。点进某个城区后，背景换成该区自己的场景图。这些都是作者为本项目生成的 AI 插画（奥术蒸汽朋克），说明见 `assets/backgrounds/city/SOURCE.txt`。场景图路径写在 `data/evening.json` 的 `background` 里，不写死在代码里。住所可以按等级换图：阁楼用 `home_attic.jpg`，以后的公寓、宅邸、浮空庄园只要在住房条目上加 `background`，没有就继续用阁楼那张。这些图会缩小显示，导入时带 mipmap，地图和场景单独用线性过滤，不跟着界面的最近邻走。
 
 主角希雅的半身立绘也是同一套 AI 流程，放在 `assets/portraits/heroine/`（见 `SOURCE.txt`）。白底用 `tools/cutout_portraits.py` 抠掉：先用 rembg 的 isnet-anime 得到轮廓，再去掉发丝线稿围住的近白。衬衫、袖口、口罩、毯子和枕头留着。身体状态优先于情绪：住院、发烧、感冒、疲劳各用一张整图，健康时才按平静 / 乐观 / 悲观 / 狂热 / 恐慌换。对话的 `cry` 和结局的 `ecstatic` 也有整图。立绘不再带方格底和木框，角色外侧有一圈描边，颜色写在 `characters.json` 的 `outline`。别的角色没有图时仍用代码画的占位立绘，占位图没有描边。
 
@@ -166,7 +167,7 @@ stock-life/
 │       ├── portrait_painter.gd  # 占位立绘：底图 + 表情层 + 状态叠加层
 │       ├── portrait_view.gd  # 可复用的立绘框
 │       ├── overlay.gd        # 弹出层基类
-│       ├── dialog_box.gd / morning_paper.gd / predict_popup.gd / day_summary.gd / city_map.gd / city_canvas.gd / chapter_end.gd / repay_dialog.gd
+│       ├── dialog_box.gd / morning_paper.gd / predict_popup.gd / day_summary.gd / city_map.gd / city_canvas.gd / city_geom.gd / chapter_end.gd / repay_dialog.gd
 │       ├── net_worth_chart.gd   # 净资产曲线
 │       ├── fx_layer.gd       # 涨停金币雨、暴跌震屏
 │       └── ui_style.gd       # 配色与格式化

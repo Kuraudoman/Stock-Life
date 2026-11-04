@@ -184,6 +184,18 @@ static func resolve_hook(_hook: String, _ctx: Dictionary) -> Dictionary:
 
 # ---------------------------------------------------------------- 界面用的描述
 
+## 发烧只能休息，住院只能睡觉。住所仍可进入（休息，或看见为什么出不了门），
+## 其余城区今晚锁上，地图上变暗，悬停说明原因。
+static func district_closed(location_id: String, hospital: bool, fever: bool) -> String:
+	if location_id == "home":
+		return ""
+	if hospital:
+		return "还在住院，今晚只能睡觉"
+	if fever:
+		return "在发烧，今晚只能休息"
+	return ""
+
+
 ## 城区插画。background_track 为 "housing" 时，用当前住所等级上的 background；
 ## 该等级没写图，就回退到城区自己的 background（阁楼那张）。
 static func background_path(loc: Dictionary, player: Dictionary = {}) -> String:

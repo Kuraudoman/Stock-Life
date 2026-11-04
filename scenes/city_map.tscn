@@ -20,6 +20,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.16, 0.22, 0.32, 0.45)
 
 [node name="Margin" type="MarginContainer" parent="."]
@@ -29,6 +30,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 16
@@ -68,72 +70,120 @@ theme_override_font_sizes/font_size = 13
 text = "体力 100  压力 20  名声 0  进修 0/100"
 autowrap_mode = 2
 
-[node name="Body" type="HBoxContainer" parent="Margin/Panel/VBox"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 12
-
-[node name="Map" type="Control" parent="Margin/Panel/VBox/Body"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(560, 420)
+[node name="Stage" type="Control" parent="Margin/Panel/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+
+[node name="Map" type="Control" parent="Margin/Panel/VBox/Stage"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("2_canvas")
 
-[node name="Side" type="VBoxContainer" parent="Margin/Panel/VBox/Body"]
-custom_minimum_size = Vector2(340, 0)
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 6
-
-[node name="Banner" type="TextureRect" parent="Margin/Panel/VBox/Body/Side"]
+[node name="District" type="Control" parent="Margin/Panel/VBox/Stage"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 132)
-layout_mode = 2
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Backdrop" type="TextureRect" parent="Margin/Panel/VBox/Stage/District"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 texture_filter = 4
 expand_mode = 1
 stretch_mode = 6
 
-[node name="HeroRow" type="HBoxContainer" parent="Margin/Panel/VBox/Body/Side"]
-layout_mode = 2
-theme_override_constants/separation = 8
+[node name="Shade" type="ColorRect" parent="Margin/Panel/VBox/Stage/District"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.05, 0.04, 0.06, 0.22)
 
-[node name="Heroine" type="Control" parent="Margin/Panel/VBox/Body/Side/HeroRow"]
+[node name="BackButton" type="Button" parent="Margin/Panel/VBox/Stage/District"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(96, 120)
-layout_mode = 2
+layout_mode = 1
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 196.0
+offset_bottom = 52.0
+focus_mode = 0
+text = "← 返回大地图"
+
+[node name="Heroine" type="Control" parent="Margin/Panel/VBox/Stage/District"]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -360.0
+offset_right = 260.0
+offset_bottom = -8.0
 mouse_filter = 2
 script = ExtResource("3_portrait")
 follow_state = true
 
-[node name="PlaceTitle" type="Label" parent="Margin/Panel/VBox/Body/Side"]
+[node name="Side" type="PanelContainer" parent="Margin/Panel/VBox/Stage/District"]
+layout_mode = 1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -420.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+theme_type_variation = &"FeaturePanel"
+
+[node name="SideBox" type="VBoxContainer" parent="Margin/Panel/VBox/Stage/District/Side"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PlaceTitle" type="Label" parent="Margin/Panel/VBox/Stage/District/Side/SideBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.659, 0.345, 0.122, 1)
 theme_override_font_sizes/font_size = 18
-text = "住所"
+text = "港区"
+autowrap_mode = 3
 
-[node name="PlaceBlurb" type="Label" parent="Margin/Panel/VBox/Body/Side"]
+[node name="PlaceBlurb" type="Label" parent="Margin/Panel/VBox/Stage/District/Side/SideBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 text = "……"
 autowrap_mode = 3
 
-[node name="Actions" type="VBoxContainer" parent="Margin/Panel/VBox/Body/Side"]
+[node name="Actions" type="VBoxContainer" parent="Margin/Panel/VBox/Stage/District/Side/SideBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 4
 
-[node name="Log" type="RichTextLabel" parent="Margin/Panel/VBox/Body/Side"]
+[node name="Log" type="RichTextLabel" parent="Margin/Panel/VBox/Stage/District/Side/SideBox"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 96)
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_font_sizes/normal_font_size = 13
 bbcode_enabled = false
-text = "今晚还没安排。"
+text = "今晚还没在这里安排什么。"
 scroll_following = true
 
 [node name="Footer" type="HBoxContainer" parent="Margin/Panel/VBox"]
@@ -155,3 +205,87 @@ custom_minimum_size = Vector2(220, 40)
 layout_mode = 2
 focus_mode = 0
 text = "结束今晚，回去睡觉 ▶"
+
+[node name="Modal" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Dimmer" type="ColorRect" parent="Modal"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Card" type="PanelContainer" parent="Modal"]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -250.0
+offset_right = 280.0
+offset_bottom = 250.0
+theme_type_variation = &"FeaturePanel"
+
+[node name="CardMargin" type="MarginContainer" parent="Modal/Card"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
+
+[node name="CardBox" type="VBoxContainer" parent="Modal/Card/CardMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ModalTitle" type="Label" parent="Modal/Card/CardMargin/CardBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.659, 0.345, 0.122, 1)
+theme_override_font_sizes/font_size = 20
+text = "港区"
+horizontal_alignment = 1
+
+[node name="ModalImage" type="TextureRect" parent="Modal/Card/CardMargin/CardBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 230)
+layout_mode = 2
+mouse_filter = 2
+texture_filter = 4
+expand_mode = 1
+stretch_mode = 6
+
+[node name="ModalBlurb" type="Label" parent="Modal/Card/CardMargin/CardBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "……"
+autowrap_mode = 3
+
+[node name="ModalNote" type="Label" parent="Modal/Card/CardMargin/CardBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.549, 0.451, 0.341, 1)
+theme_override_font_sizes/font_size = 13
+text = ""
+autowrap_mode = 3
+
+[node name="GoButton" type="Button" parent="Modal/Card/CardMargin/CardBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+focus_mode = 0
+text = "前往"

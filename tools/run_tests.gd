@@ -28,6 +28,7 @@ func _initialize() -> void:
 	_test_life()
 	_test_evening_logic()
 	_test_city_backgrounds()
+	_test_city_map()
 	_test_heroine_portraits()
 	_test_predict_decide()
 	_test_noelle(companies)
@@ -588,6 +589,57 @@ func _test_city_backgrounds() -> void:
 	var attic := Evening.background_path(home, {"housing": "attic"})
 	var mansion := Evening.background_path(home, {"housing": "mansion"})
 	check(attic.ends_with("home_attic.jpg") and mansion == attic, "宅邸还没单独的图，回退到阁楼")
+
+
+func _test_city_map() -> void:
+	print("大地图")
+	const Geom := preload("res://scripts/ui/city_geom.gd")
+	var polys: Dictionary = Geom.polygons()
+	var ids: Array = []
+	for loc in Evening.data().get("locations", []):
+		ids.append(String(loc.id))
+	check(polys.size() == ids.size(), "每块城区都有一块多边形")
+	var overlap := Vector2(-1, -1)
+	for id in ids:
+		check(polys.has(id), "%s 能从大地图点到" % id)
+		var poly: PackedVector2Array = polys[id]
+		check(poly.size() >= 3, "%s 的多边形至少 3 个点" % id)
+		var inside := true
+		for p in poly:
+			if p.x < 0.0 or p.y < 0.0 or p.x > 1.0 or p.y > 1.0:
+				inside = false
+		check(inside, "%s 的点都在 0..1" % id)
+		var spot: Vector2 = Geom.interior_point(poly)
+		check(Geom.hit(spot, polys) == id, "%s 的内部点命中自己" % id)
+	for y in 40:
+		for x in 40:
+			var uv := Vector2(float(x) / 39.0, float(y) / 39.0)
+			if not Geom.contains(polys["home"], uv):
+				continue
+			var other := false
+			for id in ids:
+				if id == "home":
+					continue
+				if Geom.contains(polys[id], uv):
+					other = true
+					break
+			if other:
+				overlap = uv
+				break
+		if overlap.x >= 0.0:
+			break
+	check(overlap.x >= 0.0, "住所和别的城区有重叠")
+	check(Geom.hit(overlap, polys) == "home", "重叠处优先算住所（%s）" % overlap)
+	check(Evening.district_closed("academy", false, true) != "", "发烧时学院区锁上")
+	check(Evening.district_closed("home", false, true) == "", "发烧时还能回住所")
+	check(Evening.district_closed("harbor", true, false) != "", "住院时港区锁上")
+	check(Evening.district_closed("avenue", false, false) == "", "健康时金穗大道开着")
+	var overview := Geom.overview_path()
+	check(FileAccess.file_exists(overview), "大地图文件在")
+	var tex := Evening.load_background(overview)
+	var w := tex.get_width() if tex != null else 0
+	var h := tex.get_height() if tex != null else 0
+	check(tex != null and w >= 1280 and h >= 720 and w > h, "大地图能加载，而且是横图（%dx%d）" % [w, h])
 
 
 func _test_heroine_portraits() -> void:
